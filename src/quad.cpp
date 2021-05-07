@@ -32,9 +32,9 @@ Noeud createNoeud(Sommet s1, Sommet s2, Sommet s3, Sommet s4) {
     return newNoeud;
 }
 
-Light createSun (Point3D position, ColorRGB couleur) {
+Light createSun (Vector3D rayon, ColorRGB couleur) {
     Light lumiere;
-    lumiere.position = position;
+    lumiere.rayon = normalize(rayon);
     lumiere.couleur = couleur;
     return lumiere;
 }
@@ -82,9 +82,7 @@ Vector3D normaleTriangle (Sommet s1, Sommet s2, Sommet s3) {
 ColorRGB illuminationLambert(Sommet s1, Sommet s2, Sommet s3, Light Soleil) {
     ColorRGB couleurPoint = createColor(0.,0.,0.);
     Vector3D normale = normaleTriangle (s1, s2, s3);
-    Vector3D IL = createVectorFromPoints(s1.position, Soleil.position);
-    float facteur = dot(normale, normalize(IL));
-    facteur = facteur/norm(IL)*norm(IL);
+    float facteur = dot(normale, Soleil.rayon);
     ColorRGB produitCouleurs = multColors(s1.materiau.diffuse, Soleil.couleur);
     couleurPoint = addColors(couleurPoint, multColor(produitCouleurs, facteur));
 
@@ -132,13 +130,13 @@ Camera moveCamera (Camera camera, int flagCamUp, int flagCamDown, int flagCamLef
     //camera.viseCam = addVectors(camera.viseCam, pasBackward);
 
     if (flagCamTiltUp == 1) {
-        if(*teta < 3.12) {
-            *teta -= 0.015;
+        if(*teta < 1.5) {
+            *teta += 0.015;
         }
     }
     if (flagCamTiltDown == 1) {
-        if (*teta > 0.02) {
-            *teta += 0.015;
+        if (*teta > -1.5) {
+            *teta -= 0.015;
         }
     }
     if (flagCamPanLeft == 1) {
@@ -148,8 +146,8 @@ Camera moveCamera (Camera camera, int flagCamUp, int flagCamDown, int flagCamLef
         *phi -= 0.015;
     }
 
-    Vector3D rotation = createVector(5*cos(*phi)*sin(*teta), 5*sin(*phi)*sin(*teta), 5*cos(*teta));
-    camera.viseCam = addVectors(camera.posCam, rotation);
+    Vector3D rotation = createVector(5*cos(*phi)*cos(*teta), 5*sin(*phi)*cos(*teta), 5*sin(*teta));
+    camera.viseCam = addVectors(camera.posCam, normalize(rotation));
 
     return camera;
 }

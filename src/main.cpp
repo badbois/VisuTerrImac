@@ -14,6 +14,7 @@
 #include "../include/read.h"
 
 #include "../include/quad.h"
+#include "../include/quadtree.h"
 
 /* Dimensions initiales et titre de la fenetre */
 static const unsigned int WINDOW_WIDTH = 800;
@@ -38,7 +39,7 @@ static int flagCamTiltUp = 0;
 static int flagCamTiltDown = 0;
 
 static float phi = 2.;
-static float teta = 2.; 
+static float teta = -0.1; 
 
 /* Nombre minimal de millisecondes separant le rendu de deux images */
 static const Uint32 FRAMERATE_MILLISECONDS = 1000 / 60;
@@ -67,7 +68,7 @@ void onWindowResized(unsigned int width, unsigned int height, Camera camera)
         -GL_VIEW_SIZE / 2. / aspectRatio, GL_VIEW_SIZE / 2. / aspectRatio);
     }
     */
-   gluPerspective(90.0, aspectRatio, 1., 100.);
+   gluPerspective(50.0, aspectRatio, 1., 100.);
    orienteCamera(camera);
 }
 
@@ -135,6 +136,14 @@ int main(int argc, char** argv)
         }
        
     }
+
+    // Test quadtree
+    /*
+    Node* quadTree = createNode(0);
+    int longueur = width;
+    int hauteur = height;
+*/
+    
 
     //* Initialisation de la SDL */
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE,32); 
@@ -248,9 +257,9 @@ int main(int argc, char** argv)
 
         // Gestion Soleil
         angleSoleil += (2*M_PI)/500;
-        Point3D positionSoleil = createPoint(100.*cos(angleSoleil),0.,100.*sin(angleSoleil));
-        ColorRGB couleurSoleil = createColor(1.,1.,1.);
-        Light Soleil = createSun(positionSoleil, couleurSoleil);
+        Vector3D rayonSoleil = createPoint(100.*cos(angleSoleil),0.,100.*sin(angleSoleil));
+        ColorRGB couleurSoleil = createColor(2.,2.,2.);
+        Light Soleil = createSun(rayonSoleil, couleurSoleil);
 
         // Gestion caméra
 

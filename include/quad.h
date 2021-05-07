@@ -18,7 +18,7 @@ typedef struct Noeud {
 } Noeud;
 
 typedef struct {
-    Point3D position;
+    Vector3D rayon;
     ColorRGB couleur;
 } Light;
 
@@ -30,7 +30,7 @@ typedef struct {
 
 Sommet createSommet(float x, float y, float z, Material materiau);
 Noeud createNoeud(Sommet s1, Sommet s2, Sommet s3, Sommet s4);
-Light createSun (Point3D position, ColorRGB couleur);
+Light createSun (Vector3D rayon, ColorRGB couleur);
 
 void drawTriangle(Sommet s1, Sommet s2, Sommet s3, Light Soleil);
 void drawTriangles(Noeud noeud, Light Soleil);
