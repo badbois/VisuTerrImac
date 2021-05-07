@@ -1,12 +1,12 @@
 #include <SDL2/SDL.h>
 
 //linux
-/*#include <GL/gl.h>
-#include <GL/glu.h>*/
+#include <GL/gl.h>
+#include <GL/glu.h>
 
 //mac
-#include <OpenGl/gl.h>
-#include <OpenGl/glu.h>
+/*#include <OpenGl/gl.h>
+#include <OpenGl/glu.h>*/
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -14,8 +14,6 @@
 #include "../include/read.h"
 
 #include "../include/quad.h"
-
-#define GL_SILENCE_DEPRECATION
 
 /* Dimensions initiales et titre de la fenetre */
 static const unsigned int WINDOW_WIDTH = 800;

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <cstring>
 using namespace std;
 
 int lectureFichier(string *nameHeightMap,int *Xsize, int *Ysize, int *Zmin, int *Zmax, int *Znear, int *Zfar){

@@ -1,11 +1,11 @@
 CC		= g++
 #mac
-CFLAGS	=  -O2 -g -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/OpenGL.framework/Versions/A/Headers
-LDFLAGS	= -L/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/ -lSDL2  -lGLU -lGL -lm
+#CFLAGS	=  -O2 -g -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/OpenGL.framework/Versions/A/Headers
+#LDFLAGS	= -L/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/ -lSDL2  -lGLU -lGL -lm
 
 #linux
-#CFLAGS	= -Wall -O2 -g
-#LDFLAGS	= -lSDL2  -lGLU -lGL -lm
+CFLAGS	= -Wall -O2 -g
+LDFLAGS	= -lSDL2  -lGLU -lGL -lm
 
 BIN_DIR	= bin
 INC_DIR = -I include
