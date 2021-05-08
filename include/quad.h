@@ -32,8 +32,8 @@ Sommet createSommet(float x, float y, float z, Material materiau);
 Noeud createNoeud(Sommet s1, Sommet s2, Sommet s3, Sommet s4);
 Light createSun (Vector3D rayon, ColorRGB couleur);
 
-void drawTriangle(Sommet s1, Sommet s2, Sommet s3, Light Soleil);
-void drawTriangles(Noeud noeud, Light Soleil);
+void drawTriangle(Sommet s1, Sommet s2, Sommet s3, Light Soleil, GLuint texture);
+void drawTriangles(Noeud noeud, Light Soleil, GLuint texture);
 
 // Pour calculer la normale (pour l'illumination), on a besoin du produit vectoriel
 // Attention le produit vectoriel donne une base directe, y penser quand on donne les vecteurs AB et AC

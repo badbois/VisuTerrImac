@@ -5,7 +5,7 @@ CC		= g++
 
 #linux
 CFLAGS	= -Wall -O2 -g
-LDFLAGS	= -lSDL2  -lGLU -lGL -lm
+LDFLAGS	= -lSDL2  -lGLU -lGL -lm -lSDL2_image
 
 BIN_DIR	= bin
 INC_DIR = -I include

@@ -1,4 +1,5 @@
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 
 //linux
 #include <GL/gl.h>
@@ -180,15 +181,7 @@ int main(int argc, char** argv)
         }
        
     }
-
-    // Test quadtree
-    /*
-    Node* quadTree = createNode(0);
-    int longueur = width;
-    int hauteur = height;
-*/
     
-
     //* Initialisation de la SDL */
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE,32); 
 
@@ -255,10 +248,26 @@ int main(int argc, char** argv)
     camera.viseCam = createPoint(0.,0.,0.);
     camera.up = createPoint(0.,0.,1.);
 
-
     // glu
   
     onWindowResized(WINDOW_WIDTH, WINDOW_HEIGHT, camera);
+
+    // Image sol
+
+    SDL_Surface* imageGrass = IMG_Load("./assets/grass.jpg");
+    if (!imageGrass) {
+        printf("erreur \n");
+    } else {
+        printf("ok \n");
+    } 
+   
+    GLuint grass;
+    glGenTextures(1, &grass);
+    glBindTexture(GL_TEXTURE_2D, grass);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imageGrass->w, imageGrass->h, 0, GL_RGB, GL_UNSIGNED_BYTE, imageGrass->pixels);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     // Definition du noeud a dessiner
 
@@ -332,9 +341,29 @@ int main(int argc, char** argv)
 
         //Origine et triangles
         drawOrigin();
-        drawTriangles(noeud, Soleil);
+        drawTriangles(noeud, Soleil, grass);
 
+        //testTexture
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, grass);
+
+        glBegin(GL_QUADS);
+
+        glTexCoord2f(0.,0.);
+        glVertex2f(-0.5,0.5);
+        glTexCoord2f(1.,0.);
+        glVertex2f(0.5,0.5);
+        glTexCoord2f(1.,1.);
+        glVertex2f(0.5,-0.5);
+        glTexCoord2f(0.,1.);
+        glVertex2f(-0.5,-0.5);
+
+        glEnd();
         
+        
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glDisable(GL_TEXTURE_2D);
+        //testTexture
 
         //Normales
         glBegin(GL_LINES);
@@ -484,6 +513,10 @@ int main(int argc, char** argv)
     }
 
     /* Liberation des ressources associees a la SDL */ 
+
+    glDeleteTextures(1, &grass);
+    SDL_FreeSurface(imageGrass);
+
     SDL_GL_DeleteContext(context);
     SDL_DestroyWindow(window);
     SDL_Quit();

@@ -41,26 +41,35 @@ Light createSun (Vector3D rayon, ColorRGB couleur) {
     return lumiere;
 }
 
-void drawTriangle(Sommet s1, Sommet s2, Sommet s3, Light Soleil) {
+void drawTriangle(Sommet s1, Sommet s2, Sommet s3, Light Soleil, GLuint texture) {
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, texture);
+
     glBegin(GL_TRIANGLES);
         ColorRGB couleurS1 = illuminationLambert(s1, s2, s3, Soleil);
         glColor3f(couleurS1.r, couleurS1.g, couleurS1.b);
+        glTexCoord2f(0.,0.);
         glVertex3f(s1.position.x, s1.position.y, s1.position.z);
 
         ColorRGB couleurS2 = illuminationLambert(s2, s3, s1, Soleil);
         glColor3f(couleurS2.r, couleurS2.g, couleurS2.b);
+        glTexCoord2f(1.,0.);
         glVertex3f(s2.position.x, s2.position.y, s2.position.z);
 
         ColorRGB couleurS3 = illuminationLambert(s3, s1, s2, Soleil);
         glColor3f(couleurS3.r, couleurS3.g, couleurS3.b);
+        glTexCoord2f(1.,1.);
         glVertex3f(s3.position.x, s3.position.y, s3.position.z);
     glEnd();   
+
+     glBindTexture(GL_TEXTURE_2D, 0);
+        glDisable(GL_TEXTURE_2D);
 }
 
 
-void drawTriangles(Noeud noeud, Light Soleil){
-    drawTriangle(noeud.sommet1, noeud.sommet2, noeud.sommet3, Soleil);
-    drawTriangle(noeud.sommet3, noeud.sommet4, noeud.sommet1, Soleil);
+void drawTriangles(Noeud noeud, Light Soleil, GLuint texture){
+    drawTriangle(noeud.sommet1, noeud.sommet2, noeud.sommet3, Soleil, texture);
+    drawTriangle(noeud.sommet3, noeud.sommet4, noeud.sommet1, Soleil, texture);
 }
 
 Vector3D produitVectoriel(Vector3D AC, Vector3D AB) {
