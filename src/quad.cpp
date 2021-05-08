@@ -11,6 +11,8 @@
 #include <stdio.h>
 #include <math.h>
 #include "../include/quad.h"
+#include "../include/quadtree.h"
+#include "../include/shading.h"
 
 Sommet createSommet(float x, float y, float z, Material materiau) {
     Sommet newSommet;
@@ -151,3 +153,4 @@ Camera moveCamera (Camera camera, int flagCamUp, int flagCamDown, int flagCamLef
 
     return camera;
 }
+

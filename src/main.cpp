@@ -68,7 +68,7 @@ void onWindowResized(unsigned int width, unsigned int height, Camera camera)
         -GL_VIEW_SIZE / 2. / aspectRatio, GL_VIEW_SIZE / 2. / aspectRatio);
     }
     */
-   gluPerspective(50.0, aspectRatio, 1., 100.);
+   gluPerspective(50.0, aspectRatio, 0.1, 100.);
    orienteCamera(camera);
 }
 
@@ -105,6 +105,50 @@ void drawOrigin()
     glVertex3f( 0.0 , 0.0, 0.0);
     glVertex3f( 0.0 , 0.0, -1.0);
 
+    glEnd();
+
+    glColor3fv(currentColor);
+}
+
+void drawCenteredBox(float length) 
+{
+    float currentColor[4];
+    glGetFloatv(GL_CURRENT_COLOR,currentColor);
+
+    glBegin(GL_QUADS);
+    float l = length/2;
+
+    glColor3f(0.5, 0.5, 0.9);
+    glVertex3f(-l , l, -l);
+    glVertex3f(-l , l, l);
+    glVertex3f(-l , -l, l);
+    glVertex3f(-l , -l, -l);
+
+    glVertex3f(-l , l, -l);
+    glVertex3f(-l , l, l);
+    glVertex3f(l , l, l);
+    glVertex3f(l , l, -l);
+
+    glVertex3f(l , -l, -l);
+    glVertex3f(l , -l, l);
+    glVertex3f(l , l, l);
+    glVertex3f(l , l, -l);
+
+    glVertex3f(l , -l, -l);
+    glVertex3f(l , -l, l);
+    glVertex3f(-l , -l, -l);
+    glVertex3f(-l , -l, l);
+
+    glVertex3f(-l , -l, -l);
+    glVertex3f(-l , l, -l);
+    glVertex3f(l , l, -l);
+    glVertex3f(l , -l, -l);
+
+    glVertex3f(-l , -l, l);
+    glVertex3f(-l , l, l);
+    glVertex3f(l , l, l);
+    glVertex3f(l , -l, l);
+    
     glEnd();
 
     glColor3fv(currentColor);
@@ -273,13 +317,26 @@ int main(int argc, char** argv)
         glClear(GL_DEPTH_BUFFER_BIT);
         glMatrixMode(GL_MODELVIEW);
 
+        // Skybox
+        glPushMatrix();
+        glDepthMask(GL_FALSE);
+        glTranslatef(camera.posCam.x, camera.posCam.y, camera.posCam.z);
+        drawCenteredBox(5.);
+        glDepthMask(GL_TRUE);
+        glPopMatrix();
+
+        //Prise en compte de la profondeur
         glClearDepth(1.0f); // Depth Buffer Setup
         glEnable(GL_DEPTH_TEST); // Enables Depth Testing
         glDepthFunc(GL_LEQUAL); 
 
+        //Origine et triangles
         drawOrigin();
         drawTriangles(noeud, Soleil);
 
+        
+
+        //Normales
         glBegin(GL_LINES);
         glColor3f(1.,1.,1.); //blanc
         glVertex3f(s1.position.x, s1.position.y, s1.position.z);
