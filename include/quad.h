@@ -5,16 +5,11 @@
 #include "colors.h"
 #include "shading.h"
 
-typedef struct Sommet {
-    Point3D position;
-    Material materiau;
-} Sommet;
-
 typedef struct Noeud {
-    Sommet sommet1; // haut gauche
-    Sommet sommet2; // haut droite
-    Sommet sommet3; // bas droite
-    Sommet sommet4; // bas gauche
+    Point3D sommet1; // haut gauche
+    Point3D sommet2; // haut droite
+    Point3D sommet3; // bas droite
+    Point3D sommet4; // bas gauche
 } Noeud;
 
 typedef struct {
@@ -28,11 +23,10 @@ typedef struct {
     Point3D up;
 } Camera;
 
-Sommet createSommet(float x, float y, float z, Material materiau);
-Noeud createNoeud(Sommet s1, Sommet s2, Sommet s3, Sommet s4);
+Noeud createNoeud(Point3D s1, Point3D s2, Point3D s3, Point3D s4);
 Light createSun (Vector3D rayon, ColorRGB couleur);
 
-void drawTriangle(Sommet s1, Sommet s2, Sommet s3, Light Soleil, GLuint texture);
+void drawTriangle(Point3D s1, Point3D s2, Point3D s3, Light Soleil, GLuint texture);
 void drawTriangles(Noeud noeud, Light Soleil, GLuint texture);
 
 // Pour calculer la normale (pour l'illumination), on a besoin du produit vectoriel
@@ -41,10 +35,9 @@ void drawTriangles(Noeud noeud, Light Soleil, GLuint texture);
 Vector3D produitVectoriel(Vector3D AC, Vector3D AB);
 
 //normale en s1
-Vector3D normaleTriangle (Sommet s1, Sommet s2, Sommet s3); //tourner dans le sens horaire en partant du sommet s1
+Vector3D normaleTriangle (Point3D s1, Point3D s2, Point3D s3); //tourner dans le sens horaire en partant du sommet s1
 
-
-ColorRGB illuminationLambert(Sommet s1, Sommet s2, Sommet s3, Light Soleil);
+ColorRGB illuminationLambert(Point3D s1, Point3D s2, Point3D s3, Light Soleil);
 
 void orienteCamera(Camera camera);
 

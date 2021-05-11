@@ -14,17 +14,7 @@
 #include "../include/quadtree.h"
 #include "../include/shading.h"
 
-Sommet createSommet(float x, float y, float z, Material materiau) {
-    Sommet newSommet;
-    newSommet.position.x = x;
-    newSommet.position.y = y;
-    newSommet.position.z = z;
-    newSommet.materiau = materiau;
-
-    return newSommet;
-}
-
-Noeud createNoeud(Sommet s1, Sommet s2, Sommet s3, Sommet s4) {
+Noeud createNoeud(Point3D s1, Point3D s2, Point3D s3, Point3D s4) {
     Noeud newNoeud;
     newNoeud.sommet1 = s1;
     newNoeud.sommet2 = s2;
@@ -41,29 +31,29 @@ Light createSun (Vector3D rayon, ColorRGB couleur) {
     return lumiere;
 }
 
-void drawTriangle(Sommet s1, Sommet s2, Sommet s3, Light Soleil, GLuint texture) {
-        glEnable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, texture);
+void drawTriangle(Point3D s1, Point3D s2, Point3D s3, Light Soleil, GLuint texture) {
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, texture);
 
     glBegin(GL_TRIANGLES);
         ColorRGB couleurS1 = illuminationLambert(s1, s2, s3, Soleil);
         glColor3f(couleurS1.r, couleurS1.g, couleurS1.b);
         glTexCoord2f(0.,0.);
-        glVertex3f(s1.position.x, s1.position.y, s1.position.z);
+        glVertex3f(s1.x, s1.y, s1.z); 
 
         ColorRGB couleurS2 = illuminationLambert(s2, s3, s1, Soleil);
         glColor3f(couleurS2.r, couleurS2.g, couleurS2.b);
         glTexCoord2f(1.,0.);
-        glVertex3f(s2.position.x, s2.position.y, s2.position.z);
+        glVertex3f(s2.x, s2.y, s2.z);
 
         ColorRGB couleurS3 = illuminationLambert(s3, s1, s2, Soleil);
         glColor3f(couleurS3.r, couleurS3.g, couleurS3.b);
         glTexCoord2f(1.,1.);
-        glVertex3f(s3.position.x, s3.position.y, s3.position.z);
+        glVertex3f(s3.x, s3.y, s3.z);
     glEnd();   
 
-     glBindTexture(GL_TEXTURE_2D, 0);
-        glDisable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glDisable(GL_TEXTURE_2D);
 }
 
 
@@ -81,20 +71,21 @@ Vector3D produitVectoriel(Vector3D AC, Vector3D AB) {
     return result;
 }
 
-Vector3D normaleTriangle (Sommet s1, Sommet s2, Sommet s3) {
-    Vector3D AC = createVectorFromPoints(s1.position, s3.position);
-    Vector3D AB = createVectorFromPoints(s1.position, s2.position);
+Vector3D normaleTriangle (Point3D s1, Point3D s2, Point3D s3) {
+    Vector3D AC = createVectorFromPoints(s1, s3);
+    Vector3D AB = createVectorFromPoints(s1, s2);
     Vector3D normale = produitVectoriel(AC, AB);
     normale = normalize(normale);
 
     return normale;
 }
 
-ColorRGB illuminationLambert(Sommet s1, Sommet s2, Sommet s3, Light Soleil) {
+ColorRGB illuminationLambert(Point3D s1, Point3D s2, Point3D s3, Light Soleil) {
     ColorRGB couleurPoint = createColor(0.,0.,0.);
+    ColorRGB blanc = createColor(1.,1.,1.);
     Vector3D normale = normaleTriangle (s1, s2, s3);
     float facteur = dot(normale, Soleil.rayon);
-    ColorRGB produitCouleurs = multColors(s1.materiau.diffuse, Soleil.couleur);
+    ColorRGB produitCouleurs = multColors(blanc, Soleil.couleur);
     couleurPoint = addColors(couleurPoint, multColor(produitCouleurs, facteur));
 
     return couleurPoint;

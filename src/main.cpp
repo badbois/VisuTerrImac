@@ -271,35 +271,23 @@ int main(int argc, char** argv)
 
     // Definition du noeud a dessiner
 
-    ColorRGB diffuse1 = createColor(0.5, 0.5, 0.5); //Gris
-    ColorRGB nulle = createColor(0., 0., 0.); //Noir
-    Material materiau1 = createMaterial(diffuse1, nulle, 1.);
-    Sommet s1 = createSommet(0., 1., 1., materiau1);
-
-    ColorRGB diffuse2 = createColor(0.5, 0.5, 0.5); //Gris
-    Material materiau2 = createMaterial(diffuse2, nulle, 1.);
-    Sommet s2 = createSommet(1., 0., 0., materiau2);
-
-    ColorRGB diffuse3 = createColor(0.5, 0.5, 0.5); //Gris
-    Material materiau3 = createMaterial(diffuse3, nulle, 1.);
-    Sommet s3 = createSommet(0., -1., 1., materiau3);
-
-    ColorRGB diffuse4 = createColor(0.5, 0.5, 0.5); //Gris
-    Material materiau4 = createMaterial(diffuse4, nulle, 1.);
-    Sommet s4 = createSommet(-1., 0.,0., materiau4);
+    Point3D s1 = createPoint(0.,1.,1.);
+    Point3D s2 = createPoint(1.,0.,0.);
+    Point3D s3 = createPoint(0.,-1.,1.);
+    Point3D s4 = createPoint(-1.,0.,0.);
 
     Noeud noeud = createNoeud (s1, s2, s3, s4);
 
     float angleSoleil = M_PI/4;
 
     Vector3D normale1 = normaleTriangle (s1, s2, s3);
-    normale1 = addVectors(s1.position, normale1);
+    normale1 = addVectors(s1, normale1);
 
      Vector3D normale2 = normaleTriangle (s2, s3, s1);
-    normale2 = addVectors(s2.position, normale2);
+    normale2 = addVectors(s2, normale2);
 
      Vector3D normale3 = normaleTriangle (s3, s1, s2);
-    normale3 = addVectors(s3.position, normale3);
+    normale3 = addVectors(s3, normale3);
   
     /* Boucle principale */
     int loop = 1;
@@ -368,13 +356,13 @@ int main(int argc, char** argv)
         //Normales
         glBegin(GL_LINES);
         glColor3f(1.,1.,1.); //blanc
-        glVertex3f(s1.position.x, s1.position.y, s1.position.z);
+        glVertex3f(s1.x, s1.y, s1.z);
         glVertex3f(normale1.x, normale1.y, normale1.z);
 
-        glVertex3f(s2.position.x, s2.position.y, s2.position.z);
+        glVertex3f(s2.x, s2.y, s2.z);
         glVertex3f(normale2.x, normale2.y, normale2.z);
 
-        glVertex3f(s3.position.x, s3.position.y, s3.position.z);
+        glVertex3f(s3.x, s3.y, s3.z);
         glVertex3f(normale3.x, normale3.y, normale3.z);
         glEnd();
         
