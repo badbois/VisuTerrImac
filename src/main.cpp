@@ -179,8 +179,13 @@ int main(int argc, char** argv)
         }else{
             cout << map[i]<< endl;
         }
-       
     }
+
+    /*Point3D A = createPoint(0.,height,0.);
+    Point3D B = createPoint(width, height, 0.);
+    Point3D C = createPoint(width, 0., 0.);
+    Point3D D = createPoint(0.,0.,0.);
+    Node* quadtree = createTree(A,B,C,D,map,width);*/
     
     //* Initialisation de la SDL */
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE,32); 

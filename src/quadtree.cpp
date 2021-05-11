@@ -155,7 +155,7 @@ void ajustePointsEnfants (float x1, float x2, float* X, float* correction) {
     }
 }*/
     
-Node* createTree(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD, int *map, int mapWidth){ //PAS FINI
+/*Node* createTree(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD, int *map, int mapWidth){ //PAS FINI
     
     //recuperation des coord Z des points
     getZ(&pointA, map, mapWidth);
@@ -200,6 +200,45 @@ Node* createTree(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD,
         newNode->topRight = createTree(pointAB2, pointB, pointBC2, pointCentreTR, map, mapWidth);
         newNode->botRight = createTree(pointCentreBR, pointBC1, pointC, pointCD2, map, mapWidth);
         newNode->botLeft = createTree(pointDA1, pointCentreBL, pointCD1, pointD, map, mapWidth);
+    }
+
+    return newNode;
+    
+}*/
+
+// Version où on arrondit au dessus
+
+Node* createTree(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD, int *map, int mapWidth){ //PAS FINI
+    
+    //recuperation des coord Z des points
+    getZ(&pointA, map, mapWidth);
+    getZ(&pointB, map, mapWidth);
+    getZ(&pointC, map, mapWidth);
+    getZ(&pointD, map, mapWidth);
+
+    //creation du noeux
+    Node *newNode=createNode(pointA, pointB, pointC, pointD);
+
+    // Calculs des coordonnées des points enfants : milieu AB et BC
+    // Arrondi au dessus (égal si nombre entier)
+    float ABx = ceilf((pointA.x+pointB.x)/2);
+    float BCy = ceilf((pointB.x+pointC.x)/2);
+
+    //l'espace est encore divisible par 4????
+    if(!(ABx == pointB.x && BCy == pointB.y)){
+
+        //creation des points pour les enfants
+        Point3D pointAB=createPoint(ABx, pointA.y, 0.);
+        Point3D pointBC=createPoint(pointB.x, BCy, 0);
+        Point3D pointCD=createPoint(ABx, pointC.y, 0);
+        Point3D pointDA=createPoint(pointD.x, BCy, 0);
+        Point3D pointCentre=createPoint(ABx, BCy, 0);
+
+        //Creation des 4 enfants 
+        newNode->topLeft = createTree(pointA, pointAB, pointCentre, pointDA, map, mapWidth);
+        newNode->topRight = createTree(pointAB, pointB, pointBC, pointCentre, map, mapWidth);
+        newNode->botRight = createTree(pointCentre, pointBC, pointC, pointCD, map, mapWidth);
+        newNode->botLeft = createTree(pointDA, pointCentre, pointCD, pointD, map, mapWidth);
     }
 
     return newNode;
