@@ -181,11 +181,16 @@ int main(int argc, char** argv)
         }
     }
 
-    /*Point3D A = createPoint(0.,height,0.);
-    Point3D B = createPoint(width, height, 0.);
-    Point3D C = createPoint(width, 0., 0.);
-    Point3D D = createPoint(0.,0.,0.);
-    Node* quadtree = createTree(A,B,C,D,map,width);*/
+    Point3D trucA = createPoint(0.,(float)(height-1),0.);
+    Point3D trucB = createPoint((float)(width), (float)(height-1), 0.);
+    Point3D trucC = createPoint((float)(width), 0., 0.);
+    Point3D trucD = createPoint(0.,0.,0.);
+    Node* quadtree = createTree(trucA,trucB,trucC,trucD,map,width);
+
+    printPoint3D(quadtree->pointA);
+    printPoint3D(quadtree->pointB);
+    printPoint3D(quadtree->pointC);
+    printPoint3D(quadtree->pointD);
     
     //* Initialisation de la SDL */
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE,32); 
@@ -334,7 +339,8 @@ int main(int argc, char** argv)
 
         //Origine et triangles
         drawOrigin();
-        drawTriangles(noeud, Soleil, grass);
+        //drawTriangles(noeud, Soleil, grass);
+        drawTree(quadtree, Soleil, grass);
 
         //testTexture
         glEnable(GL_TEXTURE_2D);

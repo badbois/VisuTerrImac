@@ -57,9 +57,20 @@ void drawTriangle(Point3D s1, Point3D s2, Point3D s3, Light Soleil, GLuint textu
 }
 
 
-void drawTriangles(Noeud noeud, Light Soleil, GLuint texture){
-    drawTriangle(noeud.sommet1, noeud.sommet2, noeud.sommet3, Soleil, texture);
-    drawTriangle(noeud.sommet3, noeud.sommet4, noeud.sommet1, Soleil, texture);
+void drawTriangles(Node noeud, Light Soleil, GLuint texture){
+    drawTriangle(noeud.pointA, noeud.pointB, noeud.pointC, Soleil, texture);
+    drawTriangle(noeud.pointC, noeud.pointD, noeud.pointA, Soleil, texture);
+}
+
+void drawTree(Node* quadtree, Light soleil, GLuint texture) {
+    if (quadtree->isLeaf()) {
+        drawTriangles(*quadtree, soleil, texture);
+    } else {
+        drawTree(quadtree->botLeft, soleil, texture);
+        drawTree(quadtree->topLeft, soleil, texture);
+        drawTree(quadtree->botRight, soleil, texture);
+        drawTree(quadtree->topRight, soleil, texture);
+    }
 }
 
 Vector3D produitVectoriel(Vector3D AC, Vector3D AB) {

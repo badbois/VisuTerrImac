@@ -4,6 +4,10 @@
 #include "geometry.h"
 #include "colors.h"
 #include "shading.h"
+#include "quadtree.h"
+
+#include <GL/gl.h>
+#include <GL/glu.h>
 
 typedef struct Noeud {
     Point3D sommet1; // haut gauche
@@ -27,7 +31,8 @@ Noeud createNoeud(Point3D s1, Point3D s2, Point3D s3, Point3D s4);
 Light createSun (Vector3D rayon, ColorRGB couleur);
 
 void drawTriangle(Point3D s1, Point3D s2, Point3D s3, Light Soleil, GLuint texture);
-void drawTriangles(Noeud noeud, Light Soleil, GLuint texture);
+void drawTriangles(Node noeud, Light Soleil, GLuint texture);
+void drawTree(Node* quadtree, Light soleil, GLuint texture);
 
 // Pour calculer la normale (pour l'illumination), on a besoin du produit vectoriel
 // Attention le produit vectoriel donne une base directe, y penser quand on donne les vecteurs AB et AC

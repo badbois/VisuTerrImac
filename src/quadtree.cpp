@@ -73,7 +73,7 @@ Node* createNode(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD)
 
 void getZ(Point3D *point, int *map, int mapWidth){
     int i=point->y * mapWidth + point->x;
-    point->z=map[i];
+    point->z= (map[i]/15.);
 }
 
 /*Node* createTree(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD, int *map, int mapWidth){ //PAS FINI
@@ -222,7 +222,7 @@ Node* createTree(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD,
     // Calculs des coordonnées des points enfants : milieu AB et BC
     // Arrondi au dessus (égal si nombre entier)
     float ABx = ceilf((pointA.x+pointB.x)/2);
-    float BCy = ceilf((pointB.x+pointC.x)/2);
+    float BCy = ceilf((pointB.y+pointC.y)/2);
 
     //l'espace est encore divisible par 4????
     if(!(ABx == pointB.x && BCy == pointB.y)){
@@ -244,3 +244,4 @@ Node* createTree(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD,
     return newNode;
     
 }
+

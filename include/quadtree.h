@@ -1,6 +1,8 @@
 #ifndef QUADTREE_H
 #define QUADTREE_H
 #include "../include/geometry.h"
+//#include "../include/quad.h"
+
 struct Node
 {
     Point3D pointA,pointB,pointC,pointD;
@@ -28,6 +30,6 @@ typedef Node QuadTree;
 Node* createNode(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD);
 Node* createTree(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD, int *map, int mapWidth);
 
-void ajustePointsEnfants (float x1, float x2, float* X, float* correction);
+//void ajustePointsEnfants (float x1, float x2, float* X, float* correction);
 
 #endif // QUADTREE_H
