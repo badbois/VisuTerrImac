@@ -76,7 +76,7 @@ void getZ(Point3D *point, int *map, int mapWidth){
     point->z=map[i];
 }
 
-Node* createTree(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD, int *map, int mapWidth){ //PAS FINI
+/*Node* createTree(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD, int *map, int mapWidth){ //PAS FINI
     
     //recuperation des coord Z des points
     getZ(&pointA, map, mapWidth);
@@ -153,5 +153,55 @@ void ajustePointsEnfants (float x1, float x2, float* X, float* correction) {
         *X = testEntier;
         *correction = 1.;
     }
-}
+}*/
     
+Node* createTree(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD, int *map, int mapWidth){ //PAS FINI
+    
+    //recuperation des coord Z des points
+    getZ(&pointA, map, mapWidth);
+    getZ(&pointB, map, mapWidth);
+    getZ(&pointC, map, mapWidth);
+    getZ(&pointD, map, mapWidth);
+
+    //creation du noeux
+    Node *newNode=createNode(pointA, pointB, pointC, pointD);
+
+    // Calculs des coordonnées des points enfants : milieu AB et BC
+    // Arrondi au dessus et en dessous (égaux si nombre entier)
+    float ABx1 = floorf((pointA.x+pointB.x)/2);
+    float ABx2 = ceilf((pointA.x+pointB.x)/2);
+
+    float BCy1 = floorf((pointB.x+pointC.x)/2);
+    float BCy2 = ceilf((pointB.x+pointC.x)/2);
+
+//l'espace est encore divisible par 4????
+    if(!(ABx1 == pointA.x && ABx2 == pointB.x && BCy1 == pointC.y && BCy2 == pointB.y)){
+
+        //creation des points pour les enfants
+        Point3D pointAB1=createPoint(ABx1, pointA.y, 0.);
+        Point3D pointAB2=createPoint(ABx2, pointA.y, 0.);
+
+        Point3D pointBC1=createPoint(pointB.x, BCy1, 0);
+        Point3D pointBC2=createPoint(pointB.x, BCy2, 0);
+
+        Point3D pointCD1=createPoint(ABx1, pointC.y, 0);
+        Point3D pointCD2=createPoint(ABx2, pointC.y, 0);
+
+        Point3D pointDA1=createPoint(pointD.x, BCy1, 0);
+        Point3D pointDA2=createPoint(pointD.x, BCy2, 0);
+    
+        Point3D pointCentreTL=createPoint(ABx1, BCy2, 0); 
+        Point3D pointCentreTR=createPoint(ABx2, BCy2, 0);
+        Point3D pointCentreBR=createPoint(ABx2, BCy1, 0);
+        Point3D pointCentreBL=createPoint(ABx1, BCy1, 0);
+
+        //Creation des 4 enfants 
+        newNode->topLeft = createTree(pointA, pointAB1, pointCentreTL, pointDA2, map, mapWidth);
+        newNode->topRight = createTree(pointAB2, pointB, pointBC2, pointCentreTR, map, mapWidth);
+        newNode->botRight = createTree(pointCentreBR, pointBC1, pointC, pointCD2, map, mapWidth);
+        newNode->botLeft = createTree(pointDA1, pointCentreBL, pointCD1, pointD, map, mapWidth);
+    }
+
+    return newNode;
+    
+}
