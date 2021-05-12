@@ -42,6 +42,13 @@ static int flagCamTiltDown = 0;
 static float phi = 2.;
 static float teta = -0.1; 
 
+/*Soleil*/
+int switchSun = 0;
+/*Couleur Skybox*/
+ColorRGB couleurCiel = createColor(0.5, 0.5, 0.9);
+/*Mode filaire*/
+int switchWireframe = 0;
+
 /* Nombre minimal de millisecondes separant le rendu de deux images */
 static const Uint32 FRAMERATE_MILLISECONDS = 1000 / 60;
 
@@ -111,7 +118,7 @@ void drawOrigin()
     glColor3fv(currentColor);
 }
 
-void drawCenteredBox(float length) 
+void drawCenteredBox(float length, ColorRGB couleurCiel) 
 {
     float currentColor[4];
     glGetFloatv(GL_CURRENT_COLOR,currentColor);
@@ -119,7 +126,7 @@ void drawCenteredBox(float length)
     glBegin(GL_QUADS);
     float l = length/2;
 
-    glColor3f(0.5, 0.5, 0.9);
+    glColor3f(couleurCiel.r, couleurCiel.g, couleurCiel.b);
     glVertex3f(-l , l, -l);
     glVertex3f(-l , l, l);
     glVertex3f(-l , -l, l);
@@ -307,7 +314,9 @@ int main(int argc, char** argv)
         Uint32 startTime = SDL_GetTicks();
 
         // Gestion Soleil
-        angleSoleil += (2*M_PI)/500;
+        if (switchSun == 1) {
+            angleSoleil += (2*M_PI)/500;
+        }
         Vector3D rayonSoleil = createPoint(100.*cos(angleSoleil),0.,100.*sin(angleSoleil));
         ColorRGB couleurSoleil = createColor(2.,2.,2.);
         Light Soleil = createSun(rayonSoleil, couleurSoleil);
@@ -328,7 +337,9 @@ int main(int argc, char** argv)
         glPushMatrix();
         glDepthMask(GL_FALSE);
         glTranslatef(camera.posCam.x, camera.posCam.y, camera.posCam.z);
-        drawCenteredBox(5.);
+        drawCenteredBox(5., couleurCiel);
+        glRotatef(180, 0.,0.,1.);
+        drawCenteredBox(1., couleurCiel);
         glDepthMask(GL_TRUE);
         glPopMatrix();
 
@@ -337,35 +348,24 @@ int main(int argc, char** argv)
         glEnable(GL_DEPTH_TEST); // Enables Depth Testing
         glDepthFunc(GL_LEQUAL); 
 
+        //Prise en compte de la transparence
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
         //Origine et triangles
         drawOrigin();
         //drawTriangles(noeud, Soleil, grass);
-        drawTree(quadtree, Soleil, grass);
-
-        //testTexture
-        glEnable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, grass);
-
-        glBegin(GL_QUADS);
-
-        glTexCoord2f(0.,0.);
-        glVertex2f(-0.5,0.5);
-        glTexCoord2f(1.,0.);
-        glVertex2f(0.5,0.5);
-        glTexCoord2f(1.,1.);
-        glVertex2f(0.5,-0.5);
-        glTexCoord2f(0.,1.);
-        glVertex2f(-0.5,-0.5);
-
-        glEnd();
+        if (switchWireframe == 0) {
+            couleurCiel = createColor(0.5, 0.5, 0.9);
+            drawTree(quadtree, Soleil, grass);
+        } else {
+            couleurCiel = createColor(0., 0., 0.1);
+            drawTreeLines(quadtree);
+        }
         
-        
-        glBindTexture(GL_TEXTURE_2D, 0);
-        glDisable(GL_TEXTURE_2D);
-        //testTexture
 
         //Normales
-        glBegin(GL_LINES);
+        /*glBegin(GL_LINES);
         glColor3f(1.,1.,1.); //blanc
         glVertex3f(s1.x, s1.y, s1.z);
         glVertex3f(normale1.x, normale1.y, normale1.z);
@@ -376,7 +376,7 @@ int main(int argc, char** argv)
         glVertex3f(s3.x, s3.y, s3.z);
         glVertex3f(normale3.x, normale3.y, normale3.z);
         glEnd();
-        
+        */
         /* Echange du front et du back buffer : mise a jour de la fenetre */
         SDL_GL_SwapWindow(window);
         
@@ -461,10 +461,15 @@ int main(int argc, char** argv)
                         flagCamPanRight = 1;
                         flagCamPanLeft = 0;
                     }
-
+                    if (e.key.keysym.sym == 108) { // l (light, soleil qui tourne)
+                        switchSun = 1-switchSun;
+                    }
+                    if (e.key.keysym.sym == 102) { // f (mode filaire)
+                        switchWireframe = 1-switchWireframe;
+                    }
+                    
                     break;
                 case SDL_KEYUP:
-                    printf("touche pressee (code = %d)\n", e.key.keysym.sym);
                     if (e.key.keysym.sym == 104) { //H (haut)
                         flagCamUp = 0;
                     }

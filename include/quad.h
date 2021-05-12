@@ -34,6 +34,10 @@ void drawTriangle(Point3D s1, Point3D s2, Point3D s3, Light Soleil, GLuint textu
 void drawTriangles(Node noeud, Light Soleil, GLuint texture);
 void drawTree(Node* quadtree, Light soleil, GLuint texture);
 
+void drawTriangleLines(Point3D s1, Point3D s2, Point3D s3, float thickness);
+void drawTrianglesLines(Node noeud, float thickness);
+void drawTreeLines(Node* quadtree);
+
 // Pour calculer la normale (pour l'illumination), on a besoin du produit vectoriel
 // Attention le produit vectoriel donne une base directe, y penser quand on donne les vecteurs AB et AC
 // On veut que la normale pointe vers l'extérieur

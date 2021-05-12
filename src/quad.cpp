@@ -31,6 +31,7 @@ Light createSun (Vector3D rayon, ColorRGB couleur) {
     return lumiere;
 }
 
+// Affichage triangles texturés
 void drawTriangle(Point3D s1, Point3D s2, Point3D s3, Light Soleil, GLuint texture) {
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -56,7 +57,6 @@ void drawTriangle(Point3D s1, Point3D s2, Point3D s3, Light Soleil, GLuint textu
     glDisable(GL_TEXTURE_2D);
 }
 
-
 void drawTriangles(Node noeud, Light Soleil, GLuint texture){
     drawTriangle(noeud.pointA, noeud.pointB, noeud.pointC, Soleil, texture);
     drawTriangle(noeud.pointC, noeud.pointD, noeud.pointA, Soleil, texture);
@@ -71,6 +71,48 @@ void drawTree(Node* quadtree, Light soleil, GLuint texture) {
         drawTree(quadtree->botRight, soleil, texture);
         drawTree(quadtree->topRight, soleil, texture);
     }
+}
+
+// Affichage filaire
+void drawTriangleLines(Point3D s1, Point3D s2, Point3D s3, float thickness) {
+    glLineWidth(thickness);
+    glBegin(GL_LINES);
+        
+        glColor4f(1.-1./thickness, 1., 1./thickness, 1./thickness);
+        glVertex3f(s1.x, s1.y, s1.z); 
+        glVertex3f(s2.x, s2.y, s2.z);
+
+        glVertex3f(s2.x, s2.y, s2.z);
+        glVertex3f(s3.x, s3.y, s3.z);
+
+        glVertex3f(s3.x, s3.y, s3.z);
+        glVertex3f(s1.x, s1.y, s1.z); 
+    glEnd();   
+}
+
+void drawTrianglesLines(Node noeud, float thickness){
+    drawTriangleLines(noeud.pointA, noeud.pointB, noeud.pointC, thickness);
+    drawTriangleLines(noeud.pointC, noeud.pointD, noeud.pointA, thickness);
+}
+
+void drawTreeLines(Node* quadtree) {
+    float thickness = norm(createVectorFromPoints(quadtree->pointA, quadtree->pointB));
+    //thickness = 1+(thickness/10);
+    drawTrianglesLines(*quadtree, thickness);
+
+    if (quadtree->botLeft) {
+        drawTreeLines(quadtree->botLeft);
+    }
+    if (quadtree->topLeft) {
+        drawTreeLines(quadtree->topLeft);
+    }
+    if (quadtree->botRight) {
+        drawTreeLines(quadtree->botRight);
+    }
+    if (quadtree->topRight) {
+        drawTreeLines(quadtree->topRight);
+    }
+    
 }
 
 Vector3D produitVectoriel(Vector3D AC, Vector3D AB) {
