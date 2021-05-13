@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <cfloat>
 #include "../include/quad.h"
 #include "../include/quadtree.h"
 #include "../include/shading.h"
@@ -70,6 +71,17 @@ void drawTree(Node* quadtree, Light soleil, GLuint texture) {
         drawTree(quadtree->topLeft, soleil, texture);
         drawTree(quadtree->botRight, soleil, texture);
         drawTree(quadtree->topRight, soleil, texture);
+    }
+}
+
+void drawTreeLOD(Node* quadtree, Light soleil, GLuint texture, Camera camera) {
+    if (quadtree->isLeaf() || distanceFromQuad(*quadtree, camera)>6) {
+        drawTriangles(*quadtree, soleil, texture);
+    } else {
+        drawTreeLOD(quadtree->botLeft, soleil, texture, camera);
+        drawTreeLOD(quadtree->topLeft, soleil, texture, camera);
+        drawTreeLOD(quadtree->botRight, soleil, texture, camera);
+        drawTreeLOD(quadtree->topRight, soleil, texture, camera);
     }
 }
 
@@ -207,3 +219,233 @@ Camera moveCamera (Camera camera, int flagCamUp, int flagCamDown, int flagCamLef
     return camera;
 }
 
+
+int getSmallerI (float* array, int arraySize){
+    float petit = array[0];
+    int indice = 0;
+
+    for (int i=1; i<arraySize; i++) {
+        if (array[i]<petit) {
+            indice = i;
+            petit = array [i];
+        }
+    }
+
+    return indice;
+}
+
+float nodeDistance(Node quadtree, Camera camera) {
+    float distance1 = norm(createVectorFromPoints(quadtree.pointA, camera.posCam));
+    float distance2 = norm(createVectorFromPoints(quadtree.pointB, camera.posCam));
+    float distance3 = norm(createVectorFromPoints(quadtree.pointC, camera.posCam));
+    float distance4 = norm(createVectorFromPoints(quadtree.pointD, camera.posCam));
+
+    float petit = distance1;
+    if (distance2<petit) {
+        petit=distance2;
+    }
+    if (distance3<petit) {
+        petit=distance3;
+    }
+    if (distance4<petit) {
+        petit=distance4;
+    }
+    return petit;
+
+    /*float* array = (float*) malloc(sizeof(float)*4);
+    array[0] = norm(createVectorFromPoints(quadtree.pointA, camera.posCam));
+    array[1] = norm(createVectorFromPoints(quadtree.pointB, camera.posCam));
+    array[2] = norm(createVectorFromPoints(quadtree.pointC, camera.posCam));
+    array[3] = norm(createVectorFromPoints(quadtree.pointD, camera.posCam));
+
+    return array[getSmallerI(array, 4)];*/
+
+}
+
+void orderChild(Node quadtree, Node** tabPointeurEnfant, Camera camera) {
+    float* arrayDistance = (float*) malloc(sizeof(float)*4);
+    Node** childrenToSort = (Node**) malloc(sizeof(Node*)*4);
+
+    arrayDistance[0] = nodeDistance(*quadtree.topLeft, camera);
+    childrenToSort[0] = quadtree.topLeft;
+
+    arrayDistance[1] = nodeDistance(*quadtree.topRight, camera);
+    childrenToSort[1] = quadtree.topRight;
+
+    arrayDistance[2]  = nodeDistance(*quadtree.botRight, camera);
+    childrenToSort[2] = quadtree.botRight;
+
+    arrayDistance[3]  = nodeDistance(*quadtree.botLeft, camera);
+    childrenToSort[3] = quadtree.botLeft;
+
+    int indicePetit;
+    for (int i = 0; i<4; i++) {
+        indicePetit = getSmallerI(arrayDistance, 4);
+        tabPointeurEnfant[i] = childrenToSort[indicePetit];
+        arrayDistance[indicePetit] = FLT_MAX;
+    }
+}
+
+Point3D projectionPointPlane(Point3D cam, Point3D A, Point3D B, Point3D C) {
+    Vector3D normalePlan = normaleTriangle(A, B, C);
+    Vector3D planCam = createVectorFromPoints(cam, A);
+    float distancePlan = dot(normalePlan, planCam);
+
+    Vector3D projection = multVector(normalePlan, distancePlan);
+    Point3D projete = addVectors(cam, projection);
+
+    return projete;
+}
+
+Point3D projectionPointDroite(Point3D reference, Point3D A, Point3D B, Point3D C) {
+    Vector3D normalePlan = normaleTriangle(A, B, C);
+    Vector3D segment = createVectorFromPoints(A,B);
+    Vector3D normaleSegment = normalize(produitVectoriel(normalePlan, segment));
+
+    Vector3D SegmentRef = createVectorFromPoints(reference, A);
+
+    float distanceDroite = dot(normaleSegment, SegmentRef);
+
+    Vector3D projection = multVector(normaleSegment, distanceDroite);
+    Point3D projete = addVectors(reference, projection);
+
+    return projete;
+}
+
+Point3D projectionPointSegment(Point3D reference, Point3D A, Point3D B) {
+    Vector3D refB = createVectorFromPoints(reference, B);
+    Vector3D BA = createVectorFromPoints(B,A);
+
+    if (dot(refB, BA)>0) {
+        return B;
+    } else {
+        Vector3D refA = createVectorFromPoints(reference, A);
+        Vector3D AB = createVectorFromPoints(A,B);
+        if (dot(refA, AB)>0) {
+            return A;
+        } else {
+            return reference;
+        }
+    }
+}
+
+// En utilisant la méthode des coordonnées barycentrique,
+// Prend un triangle et un point P dans le même plan, 
+// Trouve le point du triangle le plus proche de P.
+Point3D closestPointTriangleInTheSamePlane(Point3D P, Point3D A, Point3D B, Point3D C) {
+    // coordonnées barycentriques de P
+    Vector3D base1 = normalize(createVectorFromPoints(P,A));
+    Vector3D normalePlan = normaleTriangle(A, B, C);
+    Vector3D base2 = normalize(produitVectoriel(base1, normalePlan));
+
+    Vector3D PB = createVectorFromPoints(P,B);
+    Vector3D PC = createVectorFromPoints(P,C);
+    Vector3D PA = createVectorFromPoints(P,A);
+
+    float PBx = dot(base1, PB);
+    float PBy = dot(base2, PB);
+    float PCx = dot(base1, PC);
+    float PCy = dot(base2, PC);
+    float PAx = dot(base1, PA);
+    float PAy = dot(base2, PA);
+
+    float alpha = determinantMatrixTwoTwo(PBx, PBy, PCx, PCy);
+    float beta = determinantMatrixTwoTwo(PCx, PCy, PAx, PAy);
+    float gamma = determinantMatrixTwoTwo(PAx, PAy, PBx, PBy);
+    float somme = alpha + beta + gamma;
+
+    alpha = alpha/somme;
+    beta = beta/somme;
+    gamma = gamma/somme;
+
+    // coordonnées barycentriques du point du triangle le plus proche de P
+    Vector3D BA = createVectorFromPoints(B, A);
+    Vector3D CA = createVectorFromPoints(C,A);
+    Vector3D CB = createVectorFromPoints(C,B);
+    Vector3D AB = createVectorFromPoints(A,B);
+    Vector3D BC = createVectorFromPoints(B,C);
+    Vector3D AC = createVectorFromPoints(A,C);
+
+    float betaClose, alphaClose, gammaClose;
+    if (alpha >= 0 && beta < 0) {
+        if (gamma < 0 && dot(PA, BA)>0) {
+            betaClose = min(1, (dot(PA,BA)/dot(BA,BA)));
+            gammaClose = 0;
+        } else {
+            betaClose = 0;
+            gammaClose = clampZeroOne(dot(PA,CA)/dot(CA, CA));
+        }
+        alphaClose = 1-betaClose-gammaClose;
+    } else if (beta >= 0 && gamma < 0) {
+        if (alpha < 0 && dot(PB, CB)>0) {
+            gammaClose = min(1, (dot(PB,CB)/dot(CB,CB)));
+            alphaClose = 0;
+        } else {
+            gammaClose = 0;
+            alphaClose = clampZeroOne(dot(PB,AB)/dot(AB, AB));
+        }
+        betaClose = 1-gammaClose-alphaClose;
+    } else if (gamma >= 0 && alpha < 0) {
+        if (beta < 0 && dot(PC, AC)>0) {
+            alphaClose = min(1, (dot(PC,AC)/dot(AC,AC)));
+            betaClose = 0;
+        } else {
+            alphaClose = 0;
+            betaClose = clampZeroOne(dot(PC,BC)/dot(BC, BC));
+        }
+        gammaClose = 1-alphaClose-betaClose;
+    } else {
+        alphaClose = alpha;
+        betaClose = beta;
+        gammaClose = gamma;
+    }
+
+    // coordonnées cartésienne du point du triangle le plus proche de P
+    Point3D closePoint = addVectors(multVector(A, alphaClose), multVector(B, betaClose));
+    closePoint = addVectors(closePoint, multVector(C, gammaClose));
+
+    return closePoint;
+}
+
+float max(float x, float y) {
+    if (x>=y) {
+        return x;
+    } else {
+        return y;
+    }
+}
+
+float min(float x, float y) {
+    if (x<=y) {
+        return x;
+    } else {
+        return y;
+    }
+}
+
+float clampZeroOne(float x) {
+    return max(min(1,x), 0);
+}
+
+float determinantMatrixTwoTwo(float a, float b, float c, float d) {
+    return a*d-b*c;
+}
+
+float distanceFromQuad(Node quadtree, Camera camera) {
+    Point3D A = quadtree.pointA;
+    Point3D B = quadtree.pointB;
+    Point3D C = quadtree.pointC;
+    Point3D D = quadtree.pointD;
+
+    // test triangle 1
+    Point3D projeteTest1 = projectionPointPlane(camera.posCam, A, B, C);
+    Point3D plusProcheTest1 = closestPointTriangleInTheSamePlane(projeteTest1, A, B, C);
+    float distance1 = norm(createVectorFromPoints(camera.posCam,plusProcheTest1));
+
+    // test triangle 2
+    Point3D projeteTest2 = projectionPointPlane(camera.posCam, C, D, A);
+    Point3D plusProcheTest2 = closestPointTriangleInTheSamePlane(projeteTest2, C, D, A);
+    float distance2 = norm(createVectorFromPoints(camera.posCam,plusProcheTest2));
+
+    return min(distance1, distance2);
+}

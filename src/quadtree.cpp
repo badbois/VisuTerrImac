@@ -74,6 +74,7 @@ Node* createNode(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD)
 void getZ(Point3D *point, int *map, int mapWidth){
     int i=point->y * mapWidth + point->x;
     point->z= (map[i]/15.);
+    //point->z= map[i];
 }
 
 /*Node* createTree(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD, int *map, int mapWidth){ //PAS FINI

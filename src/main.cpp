@@ -144,8 +144,8 @@ void drawCenteredBox(float length, ColorRGB couleurCiel)
 
     glVertex3f(l , -l, -l);
     glVertex3f(l , -l, l);
-    glVertex3f(-l , -l, -l);
     glVertex3f(-l , -l, l);
+    glVertex3f(-l , -l, -l);
 
     glVertex3f(-l , -l, -l);
     glVertex3f(-l , l, -l);
@@ -184,13 +184,13 @@ int main(int argc, char** argv)
         if(i%width!=0 ){
             cout << map[i-1]<< " ";
         }else{
-            cout << map[i]<< endl;
+            cout << map[i-1]<< endl;
         }
     }
 
     Point3D trucA = createPoint(0.,(float)(height-1),0.);
-    Point3D trucB = createPoint((float)(width), (float)(height-1), 0.);
-    Point3D trucC = createPoint((float)(width), 0., 0.);
+    Point3D trucB = createPoint((float)(width-1), (float)(height-1), 0.);
+    Point3D trucC = createPoint((float)(width-1), 0., 0.);
     Point3D trucD = createPoint(0.,0.,0.);
     Node* quadtree = createTree(trucA,trucB,trucC,trucD,map,width);
 
@@ -198,7 +198,7 @@ int main(int argc, char** argv)
     printPoint3D(quadtree->pointB);
     printPoint3D(quadtree->pointC);
     printPoint3D(quadtree->pointD);
-    
+
     //* Initialisation de la SDL */
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE,32); 
 
@@ -338,8 +338,8 @@ int main(int argc, char** argv)
         glDepthMask(GL_FALSE);
         glTranslatef(camera.posCam.x, camera.posCam.y, camera.posCam.z);
         drawCenteredBox(5., couleurCiel);
-        glRotatef(180, 0.,0.,1.);
-        drawCenteredBox(1., couleurCiel);
+        //glRotatef(180, 0.,0.,1.);
+        //drawCenteredBox(1., couleurCiel);
         glDepthMask(GL_TRUE);
         glPopMatrix();
 
@@ -355,13 +355,18 @@ int main(int argc, char** argv)
         //Origine et triangles
         drawOrigin();
         //drawTriangles(noeud, Soleil, grass);
+        glPushMatrix();
+        //glTranslatef(-((float)width-1.)/2., -((float)height-1.)/2., 0.);
+        //printf("width : %d, height: %d", width, height );
         if (switchWireframe == 0) {
             couleurCiel = createColor(0.5, 0.5, 0.9);
-            drawTree(quadtree, Soleil, grass);
+            //drawTree(quadtree, Soleil, grass);
+            drawTreeLOD(quadtree, Soleil, grass, camera);
         } else {
             couleurCiel = createColor(0., 0., 0.1);
             drawTreeLines(quadtree);
         }
+        glPopMatrix();
         
 
         //Normales
@@ -415,12 +420,12 @@ int main(int argc, char** argv)
 
                 /* Clic souris */
                 case SDL_MOUSEBUTTONUP:
-                    printf("clic en (%d, %d)\n", e.button.x, e.button.y);
+                    //printf("clic en (%d, %d)\n", e.button.x, e.button.y);
                     break;
                 
                 /* Touche clavier */
                 case SDL_KEYDOWN:
-                    printf("touche pressee (code = %d)\n", e.key.keysym.sym);
+                    //printf("touche pressee (code = %d)\n", e.key.keysym.sym);
                     if (e.key.keysym.sym == 104 && e.key.repeat == 0) { //H (haut)
                         flagCamUp = 1;
                         flagCamDown = 0;
