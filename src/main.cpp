@@ -39,7 +39,8 @@ static int flagCamPanRight = 0;
 static int flagCamTiltUp = 0;
 static int flagCamTiltDown = 0;
 
-static float phi = 2.;
+// phi 3. pour etre aligné sur axe 
+static float phi = 3.;
 static float teta = -0.1; 
 
 /*Soleil*/
@@ -261,7 +262,7 @@ int main(int argc, char** argv)
     //Camera
 
     Camera camera;
-    camera.posCam = createPoint(1.,-3.,1.);
+    camera.posCam = createPoint(0.,2.,1.);
     camera.viseCam = createPoint(0.,0.,0.);
     camera.up = createPoint(0.,0.,1.);
 
@@ -285,6 +286,25 @@ int main(int argc, char** argv)
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imageGrass->w, imageGrass->h, 0, GL_RGB, GL_UNSIGNED_BYTE, imageGrass->pixels);
     glBindTexture(GL_TEXTURE_2D, 0);
+
+
+
+    // Image billboard
+
+    GLuint bill;
+
+    SDL_Surface* imageBill = IMG_Load("./assets/tree.png");
+    if (!imageBill) {
+        printf("erreur \n");
+    } else {
+        printf("ok \n");
+    } 
+   
+    glGenTextures(1, &bill);
+    glBindTexture(GL_TEXTURE_2D, bill);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, imageBill->w,imageBill->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageBill->pixels);
+    glBindTexture(GL_TEXTURE_2D,0);
 
     // Definition du noeud a dessiner
 
@@ -382,6 +402,41 @@ int main(int argc, char** argv)
         glVertex3f(normale3.x, normale3.y, normale3.z);
         glEnd();
         */
+
+        // test Billboard
+       
+       
+        glPushMatrix();
+            glPushMatrix();
+            glRotatef(phi*(360/6.18),0.,0.,1.);
+            // printf("%f \n", phi);
+            glEnable(GL_TEXTURE_2D);
+            glBindTexture(GL_TEXTURE_2D, bill);
+            glBegin(GL_QUADS);
+
+               // glColor3f(1.,0.,1.);
+
+                glTexCoord2f(0.,0.);
+                glVertex3f(0.,-0.5,1.);
+
+                glTexCoord2f(1.,0.);
+                glVertex3f(0.,0.5,1.);
+
+                glTexCoord2f(1.,1.);
+                glVertex3f(0.,0.5,0.);
+
+                glTexCoord2f(0.,1.);
+                glVertex3f(0.,-0.5,0.);
+
+            glEnd();
+            glBindTexture(GL_TEXTURE_2D, 0);
+            glDisable(GL_TEXTURE_2D);
+
+            glPopMatrix();
+        glPopMatrix();
+
+        
+        
         /* Echange du front et du back buffer : mise a jour de la fenetre */
         SDL_GL_SwapWindow(window);
         
@@ -525,6 +580,9 @@ int main(int argc, char** argv)
 
     glDeleteTextures(1, &grass);
     SDL_FreeSurface(imageGrass);
+
+    glDeleteTextures(1, &bill);
+    SDL_FreeSurface(imageBill);
 
     SDL_GL_DeleteContext(context);
     SDL_DestroyWindow(window);
