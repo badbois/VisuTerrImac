@@ -1,22 +1,20 @@
 #include "../include/quadtree.h" 
 #include "../include/geometry.h"
 #include <stdlib.h>
+#include <iostream>
 #include <math.h>
 
-void Node::initNode(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD) {
+void Node::initNode(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD, int depth) {
     this->pointA = pointA;
     this->pointB = pointB;
     this->pointC = pointC;
     this->pointD = pointD;
+    this->depth = depth;
     this->topLeft = nullptr;
     this->topRight = nullptr;
     this->botLeft = nullptr;
     this->botRight = nullptr;
 };
-
-/*float Node::get_value() {
-    return this->value;
-};*/
 
 Node* Node::get_topLeft_child() {
     return this->topLeft;
@@ -65,14 +63,14 @@ void Node::allLeaves(Node* leaves[], int* nbLeaves){
      }
 };
 
-Node* createNode(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD) {
+Node* createNode(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD, int depth) {
     Node* newNode = new Node;
-    newNode->initNode(pointA, pointB, pointC, pointD);
+    newNode->initNode(pointA, pointB, pointC, pointD, depth);
     return newNode;
 }
 
 void getZ(Point3D *point, int *map, int mapWidth){
-    int i=point->y * mapWidth + point->x;
+    int i=point->x * mapWidth + point->y;
     point->z= (map[i]/15.);
     //point->z= map[i];
 }
@@ -209,7 +207,7 @@ void ajustePointsEnfants (float x1, float x2, float* X, float* correction) {
 
 // Version où on arrondit au dessus
 
-Node* createTree(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD, int *map, int mapWidth){ //PAS FINI
+Node* createTree(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD, int *map, int mapWidth, int depth){ //PAS FINI
     
     //recuperation des coord Z des points
     getZ(&pointA, map, mapWidth);
@@ -218,31 +216,30 @@ Node* createTree(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD,
     getZ(&pointD, map, mapWidth);
 
     //creation du noeux
-    Node *newNode=createNode(pointA, pointB, pointC, pointD);
-
+    Node *newNode=createNode(pointA, pointB, pointC, pointD, depth);
+    
     // Calculs des coordonnées des points enfants : milieu AB et BC
     // Arrondi au dessus (égal si nombre entier)
-    float ABx = ceilf((pointA.x+pointB.x)/2);
-    float BCy = ceilf((pointB.y+pointC.y)/2);
+    float ABy = ceilf((pointA.y+pointB.y)/2);
+    float BCx = ceilf((pointB.x+pointC.x)/2);
 
     //l'espace est encore divisible par 4????
-    if(!(ABx == pointB.x && BCy == pointB.y)){
+    if(!(ABy == pointC.y && BCx == pointC.x)){
 
         //creation des points pour les enfants
-        Point3D pointAB=createPoint(ABx, pointA.y, 0.);
-        Point3D pointBC=createPoint(pointB.x, BCy, 0);
-        Point3D pointCD=createPoint(ABx, pointC.y, 0);
-        Point3D pointDA=createPoint(pointD.x, BCy, 0);
-        Point3D pointCentre=createPoint(ABx, BCy, 0);
+        Point3D pointAB=createPoint(pointA.x,ABy, 0.);
+        Point3D pointBC=createPoint(BCx, pointB.y, 0);
+        Point3D pointCD=createPoint(pointC.x,ABy , 0);
+        Point3D pointDA=createPoint(BCx, pointD.y, 0);
+        Point3D pointCentre=createPoint(BCx, ABy, 0);
 
         //Creation des 4 enfants 
-        newNode->topLeft = createTree(pointA, pointAB, pointCentre, pointDA, map, mapWidth);
-        newNode->topRight = createTree(pointAB, pointB, pointBC, pointCentre, map, mapWidth);
-        newNode->botRight = createTree(pointCentre, pointBC, pointC, pointCD, map, mapWidth);
-        newNode->botLeft = createTree(pointDA, pointCentre, pointCD, pointD, map, mapWidth);
+        newNode->topLeft = createTree(pointA, pointAB, pointCentre, pointDA, map, mapWidth, depth+1);
+        newNode->topRight = createTree(pointAB, pointB, pointBC, pointCentre, map, mapWidth, depth+1);
+        newNode->botRight = createTree(pointCentre, pointBC, pointC, pointCD, map, mapWidth, depth+1);
+        newNode->botLeft = createTree(pointDA, pointCentre, pointCD, pointD, map, mapWidth, depth+1);
     }
 
     return newNode;
-    
 }
 

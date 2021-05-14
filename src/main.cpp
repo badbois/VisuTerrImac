@@ -178,7 +178,6 @@ int main(int argc, char** argv)
     if(map==NULL){
         return EXIT_FAILURE;
     }
-    
     cout <<nameHeightMap<<" "<<Xsize <<" " << Ysize <<" " << Zmin <<" " << Zmax <<" " << Znear <<" " << Zfar << endl;
     cout << width <<" "<< height<< " "<< grayLvl<< endl;
     for(int i=1; i<=(height*width); i++){
@@ -188,13 +187,12 @@ int main(int argc, char** argv)
             cout << map[i-1]<< endl;
         }
     }
+    Point3D trucA = createPoint(0.,0.,0.);
+    Point3D trucB = createPoint(0., (float)(width-1), 0.);
+    Point3D trucC = createPoint((float)(height-1), (float)(width-1), 0.);
+    Point3D trucD = createPoint((float)(height-1),0.,0.);
 
-    Point3D trucA = createPoint(0.,(float)(height-1),0.);
-    Point3D trucB = createPoint((float)(width-1), (float)(height-1), 0.);
-    Point3D trucC = createPoint((float)(width-1), 0., 0.);
-    Point3D trucD = createPoint(0.,0.,0.);
-    Node* quadtree = createTree(trucA,trucB,trucC,trucD,map,width);
-
+    Node* quadtree = createTree(trucA,trucB,trucC,trucD,map,width,0);
     printPoint3D(quadtree->pointA);
     printPoint3D(quadtree->pointB);
     printPoint3D(quadtree->pointC);
@@ -262,7 +260,7 @@ int main(int argc, char** argv)
     //Camera
 
     Camera camera;
-    camera.posCam = createPoint(0.,2.,1.);
+    camera.posCam = createPoint(5.,7.,1.);
     camera.viseCam = createPoint(0.,0.,0.);
     camera.up = createPoint(0.,0.,1.);
 
@@ -381,16 +379,20 @@ int main(int argc, char** argv)
         if (switchWireframe == 0) {
             couleurCiel = createColor(0.5, 0.5, 0.9);
             //drawTree(quadtree, Soleil, grass);
-            drawTreeLOD(quadtree, Soleil, grass, camera);
+            float* mapCopy = (float*) malloc(sizeof(float)*(height*width));
+            for(int i=0; i<(height*width); i++){
+                mapCopy[i] = (float) map[i];
+            }
+            drawTreeLOD(quadtree, Soleil, grass, camera, mapCopy, width);
         } else {
             couleurCiel = createColor(0., 0., 0.1);
             drawTreeLines(quadtree);
         }
         glPopMatrix();
         
-
+/*
         //Normales
-        /*glBegin(GL_LINES);
+        glBegin(GL_LINES);
         glColor3f(1.,1.,1.); //blanc
         glVertex3f(s1.x, s1.y, s1.z);
         glVertex3f(normale1.x, normale1.y, normale1.z);

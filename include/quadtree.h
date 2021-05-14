@@ -6,12 +6,13 @@
 struct Node
 {
     Point3D pointA,pointB,pointC,pointD;
+    int depth;
     Node* topLeft;
     Node* topRight;
     Node* botRight;
     Node* botLeft;
 
-    void initNode(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD);
+    void initNode(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD, int depth);
     //float get_value();
     Node* get_topLeft_child();
     Node* get_topRight_child();
@@ -20,15 +21,12 @@ struct Node
     bool isLeaf();
     void allLeaves(Node* leaves[], int* nbLeaves);
     
-
-    //cb de noeud avant la leave? 
-
 }; 
 
 typedef Node QuadTree;
 
-Node* createNode(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD);
-Node* createTree(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD, int *map, int mapWidth);
+Node* createNode(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD, int depth);
+Node* createTree(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD, int *map, int mapWidth, int depth);
 
 //void ajustePointsEnfants (float x1, float x2, float* X, float* correction);
 

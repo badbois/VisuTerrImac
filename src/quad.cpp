@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <cfloat>
+#include <iostream>
 #include "../include/quad.h"
 #include "../include/quadtree.h"
 #include "../include/shading.h"
@@ -36,7 +37,6 @@ Light createSun (Vector3D rayon, ColorRGB couleur) {
 void drawTriangle(Point3D s1, Point3D s2, Point3D s3, Light Soleil, GLuint texture) {
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, texture);
-
     glBegin(GL_TRIANGLES);
         ColorRGB couleurS1 = illuminationLambert(s1, s2, s3, Soleil);
         glColor3f(couleurS1.r, couleurS1.g, couleurS1.b);
@@ -74,15 +74,71 @@ void drawTree(Node* quadtree, Light soleil, GLuint texture) {
     }
 }
 
-void drawTreeLOD(Node* quadtree, Light soleil, GLuint texture, Camera camera) {
-    if (quadtree->isLeaf() || distanceFromQuad(*quadtree, camera)>6) {
+void drawTreeLOD(Node* quadtree, Light soleil, GLuint texture, Camera camera, float* map, int mapWidth) {
+    if (quadtree->isLeaf()) {
+        updateZ(quadtree, map, mapWidth);
         drawTriangles(*quadtree, soleil, texture);
+    } else if (distanceFromQuad(*quadtree, camera)>(10/(quadtree->depth+1))) {
+        updateZ(quadtree, map, mapWidth);
+        drawTriangles(*quadtree, soleil, texture);
+
+        //Modification de la map pour éviter les cracks
+        //iA, iB, iC, iD : indice des points dans la map
+        Point3D A = quadtree->pointA;
+        int iA = A.x*mapWidth+A.y;
+        Point3D B = quadtree->pointB;
+        int iB = B.x*mapWidth+B.y;
+        Point3D C = quadtree->pointC;
+        int iC = C.x*mapWidth+C.y;
+        Point3D D = quadtree->pointD;
+        int iD = D.x*mapWidth+D.y;
+
+        float deltaAB = (float) (iB - iA);
+        float zAB = B.z - A.z;
+        for (int i = iA; i<iB; i++) {
+            map[i] = (A.z + (i-iA)*(zAB/deltaAB))*15.;
+        }
+        float deltaDC = (float) (iC - iD);
+        float zDC = C.z - D.z;
+        for (int i = iD; i<iC; i++) {
+            map[i] = (D.z + (i-iD)*(zDC/deltaDC))*15.;
+        }
+        float deltaAD = (float) ((iD-iA)/mapWidth);
+        float zAD = D.z - A.z;
+        for (int i = iA; i<iD; i+= mapWidth) {
+            map[i] = (A.z + ((i-iA)/((float)mapWidth)*(zAD/deltaAD)))*15.;
+        }
+        float deltaBC = (float) ((iC-iB)/mapWidth);
+        float zBC = C.z - B.z;
+        for (int i = iB; i<iC; i+= mapWidth) {
+            map[i] = (B.z + ((i-iB)/((float)mapWidth)*(zBC/deltaBC)))*15.;
+        }
     } else {
-        drawTreeLOD(quadtree->botLeft, soleil, texture, camera);
-        drawTreeLOD(quadtree->topLeft, soleil, texture, camera);
-        drawTreeLOD(quadtree->botRight, soleil, texture, camera);
-        drawTreeLOD(quadtree->topRight, soleil, texture, camera);
+        Node** tabEnfantOrdonne = (Node**) malloc(sizeof(Node*)*4);
+        orderChildren(*quadtree, tabEnfantOrdonne, camera);
+        drawTreeLOD(tabEnfantOrdonne[3], soleil, texture, camera, map, mapWidth);
+        drawTreeLOD(tabEnfantOrdonne[2], soleil, texture, camera, map, mapWidth);
+        drawTreeLOD(tabEnfantOrdonne[1], soleil, texture, camera, map, mapWidth);
+        drawTreeLOD(tabEnfantOrdonne[0], soleil, texture, camera, map, mapWidth);
     }
+}
+
+void updateZ (Node* quadtree, float*map, int mapWidth) {
+    Point3D A = quadtree->pointA;
+    int iA = A.x*mapWidth+A.y;
+    quadtree->pointA.z = map[iA]/15.;
+
+    Point3D B = quadtree->pointB;
+    int iB = B.x*mapWidth+B.y;
+    quadtree->pointB.z = map[iB]/15.;
+
+    Point3D C = quadtree->pointC;
+    int iC = C.x*mapWidth+C.y;
+    quadtree->pointC.z = map[iC]/15.;
+
+    Point3D D = quadtree->pointD;
+    int iD = D.x*mapWidth+D.y;
+    quadtree->pointD.z = map[iD]/15.;
 }
 
 // Affichage filaire
@@ -129,7 +185,7 @@ void drawTreeLines(Node* quadtree) {
 
 Vector3D produitVectoriel(Vector3D AC, Vector3D AB) {
     Vector3D result;
-    result.x = AC.y*AB.z - AC.z * AB.y;
+    result.x = AC.y*AB.z - AC.z*AB.y;
     result.y = AC.z*AB.x - AC.x*AB.z;
     result.z = AC.x*AB.y - AC.y*AB.x;
 
@@ -262,20 +318,20 @@ float nodeDistance(Node quadtree, Camera camera) {
 
 }
 
-void orderChild(Node quadtree, Node** tabPointeurEnfant, Camera camera) {
+void orderChildren(Node quadtree, Node** tabPointeurEnfant, Camera camera) {
     float* arrayDistance = (float*) malloc(sizeof(float)*4);
     Node** childrenToSort = (Node**) malloc(sizeof(Node*)*4);
 
-    arrayDistance[0] = nodeDistance(*quadtree.topLeft, camera);
+    arrayDistance[0] = distanceFromQuad(*quadtree.topLeft, camera);
     childrenToSort[0] = quadtree.topLeft;
 
-    arrayDistance[1] = nodeDistance(*quadtree.topRight, camera);
+    arrayDistance[1] = distanceFromQuad(*quadtree.topRight, camera);
     childrenToSort[1] = quadtree.topRight;
 
-    arrayDistance[2]  = nodeDistance(*quadtree.botRight, camera);
+    arrayDistance[2]  = distanceFromQuad(*quadtree.botRight, camera);
     childrenToSort[2] = quadtree.botRight;
 
-    arrayDistance[3]  = nodeDistance(*quadtree.botLeft, camera);
+    arrayDistance[3]  = distanceFromQuad(*quadtree.botLeft, camera);
     childrenToSort[3] = quadtree.botLeft;
 
     int indicePetit;

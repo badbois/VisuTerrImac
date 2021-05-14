@@ -34,7 +34,8 @@ void drawTriangle(Point3D s1, Point3D s2, Point3D s3, Light Soleil, GLuint textu
 void drawTriangles(Node noeud, Light Soleil, GLuint texture);
 void drawTree(Node* quadtree, Light soleil, GLuint texture);
 
-void drawTreeLOD(Node* quadtree, Light soleil, GLuint texture, Camera camera);
+void drawTreeLOD(Node* quadtree, Light soleil, GLuint texture, Camera camera, float* map, int mapWidth);
+void updateZ (Node* quadtree, float*map, int mapWidth);
 
 void drawTriangleLines(Point3D s1, Point3D s2, Point3D s3, float thickness);
 void drawTrianglesLines(Node noeud, float thickness);
@@ -58,7 +59,7 @@ Camera moveCamera (Camera camera, int flagCamUp, int flagCamDown, int flagCamLef
 
 int getSmallerI (float* array, int arraySize);
 float nodeDistance(Node quadtree, Camera camera);
-void orderChild(Node quadtree, Node** tabPointeurEnfant, Camera camera);
+void orderChildren(Node quadtree, Node** tabPointeurEnfant, Camera camera);
 Point3D projectionPointPlane(Point3D cam, Point3D A, Point3D B, Point3D C);
 Point3D closestPointTriangleInTheSamePlane(Point3D P, Point3D A, Point3D B, Point3D C);
 float distanceFromQuad(Node quadtree, Camera camera);
