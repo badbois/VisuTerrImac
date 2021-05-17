@@ -375,17 +375,17 @@ int main(int argc, char** argv)
         glPushMatrix();
         //glTranslatef(-((float)width-1.)/2., -((float)height-1.)/2., 0.);
         //printf("width : %d, height: %d", width, height );
+        float* mapCopy = (float*) malloc(sizeof(float)*(height*width));
+        for(int i=0; i<(height*width); i++){
+            mapCopy[i] = (float) map[i];
+        }
         if (switchWireframe == 0) {
             couleurCiel = createColor(0.5, 0.5, 0.9);
             //drawTree(quadtree, Soleil, grass);
-            float* mapCopy = (float*) malloc(sizeof(float)*(height*width));
-            for(int i=0; i<(height*width); i++){
-                mapCopy[i] = (float) map[i];
-            }
             drawTreeLOD(quadtree, Soleil, textureId, camera, mapCopy, width);
         } else {
             couleurCiel = createColor(0., 0., 0.1);
-            drawTreeLines(quadtree);
+            drawTreeLinesLOD(quadtree,camera, mapCopy, width);
         }
         glPopMatrix();
         

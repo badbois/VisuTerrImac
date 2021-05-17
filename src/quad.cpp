@@ -187,6 +187,7 @@ void drawTrianglesLines(Node noeud, float thickness){
     drawTriangleLines(noeud.pointC, noeud.pointD, noeud.pointA, thickness);
 }
 
+// Affichage filaire sans LOD
 void drawTreeLines(Node* quadtree) {
     float thickness = norm(createVectorFromPoints(quadtree->pointA, quadtree->pointB));
     //thickness = 1+(thickness/10);
@@ -205,6 +206,58 @@ void drawTreeLines(Node* quadtree) {
         drawTreeLines(quadtree->topRight);
     }
     
+}
+
+// Affichage filaire avec LOD
+void drawTreeLinesLOD(Node* quadtree, Camera camera, float* map, int mapWidth) {
+    float thickness = norm(createVectorFromPoints(quadtree->pointA, quadtree->pointB));
+    
+    if (quadtree->isLeaf()) {
+        updateZ(quadtree, map, mapWidth);
+        drawTrianglesLines(*quadtree, thickness);
+    } else if (distanceFromQuad(*quadtree, camera)>(10/(quadtree->depth+1))) {
+        updateZ(quadtree, map, mapWidth);
+        drawTrianglesLines(*quadtree, thickness);
+
+        //Modification de la map pour éviter les cracks
+        //iA, iB, iC, iD : indice des points dans la map
+        Point3D A = quadtree->pointA;
+        int iA = A.x*mapWidth+A.y;
+        Point3D B = quadtree->pointB;
+        int iB = B.x*mapWidth+B.y;
+        Point3D C = quadtree->pointC;
+        int iC = C.x*mapWidth+C.y;
+        Point3D D = quadtree->pointD;
+        int iD = D.x*mapWidth+D.y;
+
+        float deltaAB = (float) (iB - iA);
+        float zAB = B.z - A.z;
+        for (int i = iA; i<iB; i++) {
+            map[i] = (A.z + (i-iA)*(zAB/deltaAB))*15.;
+        }
+        float deltaDC = (float) (iC - iD);
+        float zDC = C.z - D.z;
+        for (int i = iD; i<iC; i++) {
+            map[i] = (D.z + (i-iD)*(zDC/deltaDC))*15.;
+        }
+        float deltaAD = (float) ((iD-iA)/mapWidth);
+        float zAD = D.z - A.z;
+        for (int i = iA; i<iD; i+= mapWidth) {
+            map[i] = (A.z + ((i-iA)/((float)mapWidth)*(zAD/deltaAD)))*15.;
+        }
+        float deltaBC = (float) ((iC-iB)/mapWidth);
+        float zBC = C.z - B.z;
+        for (int i = iB; i<iC; i+= mapWidth) {
+            map[i] = (B.z + ((i-iB)/((float)mapWidth)*(zBC/deltaBC)))*15.;
+        }
+    } else {
+        Node** tabEnfantOrdonne = (Node**) malloc(sizeof(Node*)*4);
+        orderChildren(*quadtree, tabEnfantOrdonne, camera);
+        drawTreeLinesLOD(tabEnfantOrdonne[3], camera, map, mapWidth);
+        drawTreeLinesLOD(tabEnfantOrdonne[2], camera, map, mapWidth);
+        drawTreeLinesLOD(tabEnfantOrdonne[1], camera, map, mapWidth);
+        drawTreeLinesLOD(tabEnfantOrdonne[0], camera, map, mapWidth);
+    }
 }
 
 Vector3D produitVectoriel(Vector3D AC, Vector3D AB) {

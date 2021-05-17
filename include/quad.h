@@ -47,6 +47,7 @@ void updateZ (Node* quadtree, float*map, int mapWidth);
 void drawTriangleLines(Point3D s1, Point3D s2, Point3D s3, float thickness);
 void drawTrianglesLines(Node noeud, float thickness);
 void drawTreeLines(Node* quadtree);
+void drawTreeLinesLOD(Node* quadtree, Camera camera, float* map, int mapWidth);
 
 // Pour calculer la normale (pour l'illumination), on a besoin du produit vectoriel
 // Attention le produit vectoriel donne une base directe, y penser quand on donne les vecteurs AB et AC
