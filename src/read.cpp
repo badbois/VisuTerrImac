@@ -32,7 +32,7 @@ int lectureFichier(string *nameHeightMap,int *Xsize, int *Ysize, int *Zmin, int 
     }
 }
 
-int* lecturePGM(string nameHeightMap, int *width, int *height, int *grayLvl){
+/*int* lecturePGM(string nameHeightMap, int *width, int *height, int *grayLvl){
     string line;
     int iterator=0;
     ifstream monFlux("./assets/"+nameHeightMap);
@@ -76,6 +76,50 @@ int* lecturePGM(string nameHeightMap, int *width, int *height, int *grayLvl){
                 pch = strtok (NULL, " ");
                 iterator++;
             }
+        }
+        return map;
+    }else{
+        cout << "ERREUR: Impossible d'ouvrir le fichier PGM en lecture." << endl;
+        return NULL;
+    }
+}*/
+
+int* lecturePGM(string nameHeightMap, int *width, int *height, int *grayLvl){
+    string line;
+    int iterator=0;
+    ifstream monFlux("./assets/"+nameHeightMap);
+    if(monFlux){
+        //On skip la premiere ligne qui donne la version
+        getline(monFlux, line);
+        getline(monFlux, line);
+
+        //On lit la ligne contenant la width et height du .PGM et on les places dans les variables
+        getline(monFlux,line);
+        char *pch;
+        char str[line.length()+1];
+        strcpy(str, line.c_str());
+        pch=strtok(str," ");
+
+        while (pch != NULL){
+            if(iterator==0){
+                *width=atoi(pch);
+                iterator++;
+            }else{
+                *height=atoi(pch);
+            }
+            pch = strtok (NULL, " ");
+        }
+        
+        //On recupere le niveau de gris
+        getline(monFlux,line);
+        *grayLvl=atoi(line.c_str());
+
+        //On recupere tout le tableau de la map
+        string ligne[*height * *width];
+        int *map=(int*) malloc(sizeof(int)*(*height * *width));
+        for(int i=0; i<*height * *width; i++){
+            getline(monFlux,ligne[i]);
+            map[i]=atoi(ligne[i].c_str());
         }
         return map;
     }else{
