@@ -1,7 +1,7 @@
 #include <SDL2/SDL.h>
 //mac
-/*#include <OpenGl/gl.h>
-#include <OpenGl/glu.h>*/
+//#include <OpenGl/gl.h>
+//#include <OpenGl/glu.h>
 
 //linux
 #include <GL/gl.h>
@@ -58,12 +58,36 @@ void drawTriangle(Point3D s1, Point3D s2, Point3D s3, Light Soleil, GLuint textu
     glDisable(GL_TEXTURE_2D);
 }
 
-void drawTriangles(Node noeud, Light Soleil, GLuint texture){
-    drawTriangle(noeud.pointA, noeud.pointB, noeud.pointC, Soleil, texture);
-    drawTriangle(noeud.pointC, noeud.pointD, noeud.pointA, Soleil, texture);
+void drawTriangles(Node noeud, Light Soleil, GLuint texture[]){
+    Point3D centre=centerOfTriangle(noeud.pointA, noeud.pointB, noeud.pointC);
+    if(centre.z>=0 && centre.z<0.2){
+        drawTriangle(noeud.pointA, noeud.pointB, noeud.pointC, Soleil, texture[0]);
+    }else if(centre.z>=0.2 && centre.z<0.4){
+        drawTriangle(noeud.pointA, noeud.pointB, noeud.pointC, Soleil, texture[1]);
+    }else if(centre.z>=0.4 && centre.z<0.6){
+        drawTriangle(noeud.pointA, noeud.pointB, noeud.pointC, Soleil, texture[2]);
+    }else if(centre.z>=0.6 && centre.z<0.8){
+        drawTriangle(noeud.pointA, noeud.pointB, noeud.pointC, Soleil, texture[3]);
+    }else if(centre.z>=0.8 && centre.z<=1){
+        drawTriangle(noeud.pointA, noeud.pointB, noeud.pointC, Soleil, texture[4]);
+    }
+
+    centre=centerOfTriangle(noeud.pointC, noeud.pointD, noeud.pointA);
+    if(centre.z>=0 && centre.z<0.2){
+        drawTriangle(noeud.pointC, noeud.pointD, noeud.pointA, Soleil, texture[0]);
+    }else if(centre.z>=0.2 && centre.z<0.4){
+        drawTriangle(noeud.pointC, noeud.pointD, noeud.pointA, Soleil, texture[1]);
+    }else if(centre.z>=0.4 && centre.z<0.6){
+        drawTriangle(noeud.pointC, noeud.pointD, noeud.pointA, Soleil, texture[2]);
+    }else if(centre.z>=0.6 && centre.z<0.8){
+        drawTriangle(noeud.pointC, noeud.pointD, noeud.pointA, Soleil, texture[3]);
+    }else if(centre.z>=0.8 && centre.z<=1){
+        drawTriangle(noeud.pointC, noeud.pointD, noeud.pointA, Soleil, texture[4]);
+    }
+    
 }
 
-void drawTree(Node* quadtree, Light soleil, GLuint texture) {
+void drawTree(Node* quadtree, Light soleil, GLuint texture[]) {
     if (quadtree->isLeaf()) {
         drawTriangles(*quadtree, soleil, texture);
     } else {
@@ -74,7 +98,7 @@ void drawTree(Node* quadtree, Light soleil, GLuint texture) {
     }
 }
 
-void drawTreeLOD(Node* quadtree, Light soleil, GLuint texture, Camera camera, float* map, int mapWidth) {
+void drawTreeLOD(Node* quadtree, Light soleil, GLuint texture[], Camera camera, float* map, int mapWidth) {
     if (quadtree->isLeaf()) {
         updateZ(quadtree, map, mapWidth);
         drawTriangles(*quadtree, soleil, texture);

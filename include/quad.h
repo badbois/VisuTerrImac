@@ -6,8 +6,15 @@
 #include "shading.h"
 #include "quadtree.h"
 
+//linux
 #include <GL/gl.h>
 #include <GL/glu.h>
+
+//mac
+//#include <OpenGl/gl.h>
+//#include <OpenGl/glu.h>
+
+
 
 typedef struct Noeud {
     Point3D sommet1; // haut gauche
@@ -31,10 +38,10 @@ Noeud createNoeud(Point3D s1, Point3D s2, Point3D s3, Point3D s4);
 Light createSun (Vector3D rayon, ColorRGB couleur);
 
 void drawTriangle(Point3D s1, Point3D s2, Point3D s3, Light Soleil, GLuint texture);
-void drawTriangles(Node noeud, Light Soleil, GLuint texture);
-void drawTree(Node* quadtree, Light soleil, GLuint texture);
+void drawTriangles(Node noeud, Light Soleil, GLuint texture[]);
+void drawTree(Node* quadtree, Light soleil, GLuint texture[]);
 
-void drawTreeLOD(Node* quadtree, Light soleil, GLuint texture, Camera camera, float* map, int mapWidth);
+void drawTreeLOD(Node* quadtree, Light soleil, GLuint texture[], Camera camera, float* map, int mapWidth);
 void updateZ (Node* quadtree, float*map, int mapWidth);
 
 void drawTriangleLines(Point3D s1, Point3D s2, Point3D s3, float thickness);

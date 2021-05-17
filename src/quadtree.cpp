@@ -243,3 +243,29 @@ Node* createTree(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD,
     return newNode;
 }
 
+//version centre du triangle
+/*Point3D centerOfTriangle(Point3D a, Point3D b, Point3D c){ //potentiellement a deplacer
+    float x=(a.x+b.x+c.x)/3;
+    float y=(a.y+b.y+c.y)/3;
+    float z=(a.z+b.z+c.z)/3;
+    return createPoint(x,y,z);
+    
+}*/
+
+//version point le plus haut du triangle
+Point3D centerOfTriangle(Point3D a, Point3D b, Point3D c){ //potentiellement a deplacer
+    float x=0;
+    float y=0;
+    float z;
+
+    if(a.z>=b.z && a.z>=c.z){
+        z=a.z;
+    }else if(b.z>=a.z && b.z>=c.z){
+        z=b.z;
+    }else{
+        z=c.z;
+    }
+    
+    return createPoint(x,y,z);
+    
+}

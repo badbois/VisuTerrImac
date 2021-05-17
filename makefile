@@ -1,7 +1,7 @@
 CC		= g++
 #mac
 #CFLAGS	=  -O2 -g -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/OpenGL.framework/Versions/A/Headers
-#LDFLAGS	= -L/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/ -lSDL2  -lGLU -lGL -lm
+#LDFLAGS	= -L/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/ -lSDL2 -lSDL2_image  -lGLU -lGL -lm
 
 #linux
 CFLAGS	= -Wall -O2 -g

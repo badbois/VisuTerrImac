@@ -6,8 +6,8 @@
 #include <GL/glu.h>
 
 //mac
-/*#include <OpenGl/gl.h>
-#include <OpenGl/glu.h>*/
+//#include <OpenGl/gl.h>
+//#include <OpenGl/glu.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -268,22 +268,21 @@ int main(int argc, char** argv)
   
     onWindowResized(WINDOW_WIDTH, WINDOW_HEIGHT, camera);
 
-    // Image sol
+    // Texture
 
-    SDL_Surface* imageGrass = IMG_Load("./assets/grass.jpg");
-    if (!imageGrass) {
-        printf("erreur \n");
-    } else {
-        printf("ok \n");
-    } 
-   
-    GLuint grass;
-    glGenTextures(1, &grass);
-    glBindTexture(GL_TEXTURE_2D, grass);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    char* name[]={"assets/sandstone.jpg","assets/dirt.jpg", "assets/grass.jpg", "assets/rock.jpg","assets/snow.jpg"};
+    GLuint textureId[5];
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imageGrass->w, imageGrass->h, 0, GL_RGB, GL_UNSIGNED_BYTE, imageGrass->pixels);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    for(int i=0; i<5; i++){
+        SDL_Surface* image=IMG_Load(name[i]);
+        if(!image){
+        }
+        glGenTextures(1, &textureId[i]);
+        glBindTexture(GL_TEXTURE_2D, textureId[i]);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image->w, image->h, 0, GL_RGB, GL_UNSIGNED_BYTE, image->pixels);
+        glBindTexture(GL_TEXTURE_2D, 0);        
+    }
 
 
 
@@ -383,7 +382,7 @@ int main(int argc, char** argv)
             for(int i=0; i<(height*width); i++){
                 mapCopy[i] = (float) map[i];
             }
-            drawTreeLOD(quadtree, Soleil, grass, camera, mapCopy, width);
+            drawTreeLOD(quadtree, Soleil, textureId, camera, mapCopy, width);
         } else {
             couleurCiel = createColor(0., 0., 0.1);
             drawTreeLines(quadtree);
@@ -580,9 +579,9 @@ int main(int argc, char** argv)
 
     /* Liberation des ressources associees a la SDL */ 
 
-    glDeleteTextures(1, &grass);
-    SDL_FreeSurface(imageGrass);
-
+    for(int i=0; i<5; i++){
+        glDeleteTextures(1, &textureId[i]);
+    }
     glDeleteTextures(1, &bill);
     SDL_FreeSurface(imageBill);
 
