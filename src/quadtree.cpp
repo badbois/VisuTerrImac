@@ -69,9 +69,9 @@ Node* createNode(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD,
     return newNode;
 }
 
-void getZ(Point3D *point, int *map, int mapWidth){
+void getZ(Point3D *point, int *map, int mapWidth, float grayLvl){
     int i=point->x * mapWidth + point->y;
-    point->z= (map[i]/15.);
+    point->z= (map[i]/grayLvl);
     //point->z= map[i];
 }
 
@@ -207,13 +207,13 @@ void ajustePointsEnfants (float x1, float x2, float* X, float* correction) {
 
 // Version où on arrondit au dessus
 
-Node* createTree(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD, int *map, int mapWidth, int depth){ //PAS FINI
+Node* createTree(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD, int *map, int mapWidth, int depth, float grayLvl){ //PAS FINI
     
     //recuperation des coord Z des points
-    getZ(&pointA, map, mapWidth);
-    getZ(&pointB, map, mapWidth);
-    getZ(&pointC, map, mapWidth);
-    getZ(&pointD, map, mapWidth);
+    getZ(&pointA, map, mapWidth, grayLvl);
+    getZ(&pointB, map, mapWidth, grayLvl);
+    getZ(&pointC, map, mapWidth, grayLvl);
+    getZ(&pointD, map, mapWidth, grayLvl);
 
     //creation du noeux
     Node *newNode=createNode(pointA, pointB, pointC, pointD, depth);
@@ -234,10 +234,10 @@ Node* createTree(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD,
         Point3D pointCentre=createPoint(BCx, ABy, 0);
 
         //Creation des 4 enfants 
-        newNode->topLeft = createTree(pointA, pointAB, pointCentre, pointDA, map, mapWidth, depth+1);
-        newNode->topRight = createTree(pointAB, pointB, pointBC, pointCentre, map, mapWidth, depth+1);
-        newNode->botRight = createTree(pointCentre, pointBC, pointC, pointCD, map, mapWidth, depth+1);
-        newNode->botLeft = createTree(pointDA, pointCentre, pointCD, pointD, map, mapWidth, depth+1);
+        newNode->topLeft = createTree(pointA, pointAB, pointCentre, pointDA, map, mapWidth, depth+1, grayLvl);
+        newNode->topRight = createTree(pointAB, pointB, pointBC, pointCentre, map, mapWidth, depth+1, grayLvl);
+        newNode->botRight = createTree(pointCentre, pointBC, pointC, pointCD, map, mapWidth, depth+1, grayLvl);
+        newNode->botLeft = createTree(pointDA, pointCentre, pointCD, pointD, map, mapWidth, depth+1, grayLvl);
     }
 
     return newNode;

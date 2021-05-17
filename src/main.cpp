@@ -50,6 +50,10 @@ ColorRGB couleurCiel = createColor(0.5, 0.5, 0.9);
 /*Mode filaire*/
 int switchWireframe = 0;
 
+//gluPerspective et frustum culling
+float angleView = 50.0;
+float farView = 100.0;
+
 /* Nombre minimal de millisecondes separant le rendu de deux images */
 static const Uint32 FRAMERATE_MILLISECONDS = 1000 / 60;
 
@@ -77,7 +81,7 @@ void onWindowResized(unsigned int width, unsigned int height, Camera camera)
         -GL_VIEW_SIZE / 2. / aspectRatio, GL_VIEW_SIZE / 2. / aspectRatio);
     }
     */
-   gluPerspective(50.0, aspectRatio, 0.1, 100.);
+   gluPerspective(angleView, aspectRatio, 0.1, farView);
    orienteCamera(camera);
 }
 
@@ -187,12 +191,13 @@ int main(int argc, char** argv)
             cout << map[i-1]<< endl;
         }
     }
+
     Point3D trucA = createPoint(0.,0.,0.);
     Point3D trucB = createPoint(0., (float)(width-1), 0.);
     Point3D trucC = createPoint((float)(height-1), (float)(width-1), 0.);
     Point3D trucD = createPoint((float)(height-1),0.,0.);
 
-    Node* quadtree = createTree(trucA,trucB,trucC,trucD,map,width,0);
+    Node* quadtree = createTree(trucA,trucB,trucC,trucD,map,width,0, (float)grayLvl);
     printPoint3D(quadtree->pointA);
     printPoint3D(quadtree->pointB);
     printPoint3D(quadtree->pointC);
@@ -382,10 +387,10 @@ int main(int argc, char** argv)
         if (switchWireframe == 0) {
             couleurCiel = createColor(0.5, 0.5, 0.9);
             //drawTree(quadtree, Soleil, grass);
-            drawTreeLOD(quadtree, Soleil, textureId, camera, mapCopy, width);
+            drawTreeLOD(quadtree, Soleil, textureId, camera, mapCopy, width, grayLvl);
         } else {
             couleurCiel = createColor(0., 0., 0.1);
-            drawTreeLinesLOD(quadtree,camera, mapCopy, width);
+            drawTreeLinesLOD(quadtree,camera, mapCopy, width, grayLvl);
         }
         glPopMatrix();
         

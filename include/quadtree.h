@@ -24,9 +24,9 @@ struct Node
 }; 
 
 typedef Node QuadTree;
-
+void getZ(Point3D *point, int *map, int mapWidth, float grayLvl);
 Node* createNode(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD, int depth);
-Node* createTree(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD, int *map, int mapWidth, int depth);
+Node* createTree(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD, int *map, int mapWidth, int depth, float grayLvl);
 Point3D centerOfTriangle(Point3D a, Point3D b, Point3D c); //potentiellement a deplacer/renommer
 
 //void ajustePointsEnfants (float x1, float x2, float* X, float* correction);
