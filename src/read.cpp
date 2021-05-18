@@ -2,9 +2,22 @@
 #include <fstream>
 #include <sstream>
 #include <cstring>
+#include "read.h"
 using namespace std;
 
-int lectureFichier(string *nameHeightMap,int *Xsize, int *Ysize, int *Zmin, int *Zmax, int *Znear, int *Zfar){
+Timac createTimac(){
+    Timac timac;
+    timac.nameHeightMap="";
+    timac.Xsize=0;
+    timac.Ysize=0;
+    timac.Zfar=0;
+    timac.Zmax=0;
+    timac.Zmin=0;
+    timac.Znear=0;
+    return timac;
+}
+
+int lectureFichier(Timac *timac){
     string line[7];
     ifstream monFlux("./assets/test.timac");  //Ouverture d'un fichier en lecture
 
@@ -16,13 +29,13 @@ int lectureFichier(string *nameHeightMap,int *Xsize, int *Ysize, int *Zmin, int 
                 return 0;
             }
         }
-        *nameHeightMap=line[0].c_str(); //On place chaque ligne dans une variable
-        *Xsize=atoi(line[1].c_str());
-        *Ysize=atoi(line[2].c_str());
-        *Zmin=atoi(line[3].c_str());
-        *Zmax=atoi(line[4].c_str());
-        *Znear=atoi(line[5].c_str());
-        *Zfar=atoi(line[6].c_str());
+        timac->nameHeightMap=line[0].c_str(); //On place chaque ligne dans une variable
+        timac->Xsize=atoi(line[1].c_str());
+        timac->Ysize=atoi(line[2].c_str());
+        timac->Zmin=atoi(line[3].c_str());
+        timac->Zmax=atoi(line[4].c_str());
+        timac->Znear=atoi(line[5].c_str());
+        timac->Zfar=atoi(line[6].c_str());
         return 1;
     }
     else

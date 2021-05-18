@@ -171,26 +171,27 @@ int main(int argc, char** argv)
 {
     //Implementation et test de la lecture de fichiers
     std::string nameHeightMap;
-    int test,Xsize, Ysize, Zmin, Zmax, Znear, Zfar;
+    int test;
+    Timac timac=createTimac();
     int width, height, grayLvl;
-    test=lectureFichier(&nameHeightMap, &Xsize, &Ysize, &Zmin, &Zmax, &Znear, &Zfar);
+    test=lectureFichier(&timac);
     if (!test){
         return EXIT_FAILURE;
     }
 
-    int *map=lecturePGM(nameHeightMap, &width, &height, &grayLvl);
+    int *map=lecturePGM(timac.nameHeightMap, &width, &height, &grayLvl);
     if(map==NULL){
         return EXIT_FAILURE;
     }
-    cout <<nameHeightMap<<" "<<Xsize <<" " << Ysize <<" " << Zmin <<" " << Zmax <<" " << Znear <<" " << Zfar << endl;
-    cout << width <<" "<< height<< " "<< grayLvl<< endl;
+    cout <<timac.nameHeightMap<<" "<<timac.Xsize <<" " << timac.Ysize <<" " << timac.Zmin <<" " << timac.Zmax <<" " << timac.Znear <<" " << timac.Zfar << endl;
+    /*cout << width <<" "<< height<< " "<< grayLvl<< endl;
     for(int i=1; i<=(height*width); i++){
         if(i%width!=0 ){
             cout << map[i-1]<< " ";
         }else{
             cout << map[i-1]<< endl;
         }
-    }
+    }*/
 
     Point3D trucA = createPoint(0.,0.,0.);
     Point3D trucB = createPoint(0., (float)(width-1), 0.);
