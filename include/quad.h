@@ -41,7 +41,7 @@ void drawTriangle(Point3D s1, Point3D s2, Point3D s3, Light Soleil, GLuint textu
 void drawTriangles(Node noeud, Light Soleil, GLuint texture[]);
 void drawTree(Node* quadtree, Light soleil, GLuint texture[]);
 
-void drawTreeLOD(Node* quadtree, Light soleil, GLuint texture[], Camera camera, float* map, int mapWidth, float grayLvl);
+void drawTreeLOD(Node* quadtree, Light soleil, GLuint texture[], Camera camera, float* map, int mapWidth, float grayLvl, float zFar, float angleView);
 void updateZ (Node* quadtree, float*map, int mapWidth, float grayLvl);
 
 void drawTriangleLines(Point3D s1, Point3D s2, Point3D s3, float thickness);
@@ -76,5 +76,7 @@ float max(float x, float y);
 float min(float x, float y);
 float clampZeroOne(float x);
 float determinantMatrixTwoTwo(float a, float b, float c, float d);
+
+int FrustumCulling(Camera cam, float zFar, float angleView, Node node);
 
 #endif /*QUAD_H*/

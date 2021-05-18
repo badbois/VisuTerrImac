@@ -12,6 +12,7 @@
 #include <math.h>
 #include <cfloat>
 #include <iostream>
+using namespace std;
 #include "../include/quad.h"
 #include "../include/quadtree.h"
 #include "../include/shading.h"
@@ -98,52 +99,54 @@ void drawTree(Node* quadtree, Light soleil, GLuint texture[]) {
     }
 }
 
-void drawTreeLOD(Node* quadtree, Light soleil, GLuint texture[], Camera camera, float* map, int mapWidth, float grayLvl) {
-    if (quadtree->isLeaf()) {
-        updateZ(quadtree, map, mapWidth, grayLvl);
-        drawTriangles(*quadtree, soleil, texture);
-    } else if (distanceFromQuad(*quadtree, camera)>(2*mapWidth/(quadtree->depth+1))) {
-        updateZ(quadtree, map, mapWidth, grayLvl);
-        drawTriangles(*quadtree, soleil, texture);
+void drawTreeLOD(Node* quadtree, Light soleil, GLuint texture[], Camera camera, float* map, int mapWidth, float grayLvl, float zFar, float angleView) {
+    if (FrustumCulling(camera, zFar, angleView, *quadtree) == 1) {
+        if (quadtree->isLeaf()) {
+            updateZ(quadtree, map, mapWidth, grayLvl);
+            drawTriangles(*quadtree, soleil, texture);
+        } else if (distanceFromQuad(*quadtree, camera)>(2*mapWidth/(quadtree->depth+1))) {
+            updateZ(quadtree, map, mapWidth, grayLvl);
+            drawTriangles(*quadtree, soleil, texture);
 
-        //Modification de la map pour éviter les cracks
-        //iA, iB, iC, iD : indice des points dans la map
-        Point3D A = quadtree->pointA;
-        int iA = A.x*mapWidth+A.y;
-        Point3D B = quadtree->pointB;
-        int iB = B.x*mapWidth+B.y;
-        Point3D C = quadtree->pointC;
-        int iC = C.x*mapWidth+C.y;
-        Point3D D = quadtree->pointD;
-        int iD = D.x*mapWidth+D.y;
+            //Modification de la map pour éviter les cracks
+            //iA, iB, iC, iD : indice des points dans la map
+            Point3D A = quadtree->pointA;
+            int iA = A.x*mapWidth+A.y;
+            Point3D B = quadtree->pointB;
+            int iB = B.x*mapWidth+B.y;
+            Point3D C = quadtree->pointC;
+            int iC = C.x*mapWidth+C.y;
+            Point3D D = quadtree->pointD;
+            int iD = D.x*mapWidth+D.y;
 
-        float deltaAB = (float) (iB - iA);
-        float zAB = B.z - A.z;
-        for (int i = iA; i<iB; i++) {
-            map[i] = (A.z + (i-iA)*(zAB/deltaAB))*grayLvl;
+            float deltaAB = (float) (iB - iA);
+            float zAB = B.z - A.z;
+            for (int i = iA; i<iB; i++) {
+                map[i] = (A.z + (i-iA)*(zAB/deltaAB))*grayLvl;
+            }
+            float deltaDC = (float) (iC - iD);
+            float zDC = C.z - D.z;
+            for (int i = iD; i<iC; i++) {
+                map[i] = (D.z + (i-iD)*(zDC/deltaDC))*grayLvl;
+            }
+            float deltaAD = (float) ((iD-iA)/mapWidth);
+            float zAD = D.z - A.z;
+            for (int i = iA; i<iD; i+= mapWidth) {
+                map[i] = (A.z + ((i-iA)/((float)mapWidth)*(zAD/deltaAD)))*grayLvl;
+            }
+            float deltaBC = (float) ((iC-iB)/mapWidth);
+            float zBC = C.z - B.z;
+            for (int i = iB; i<iC; i+= mapWidth) {
+                map[i] = (B.z + ((i-iB)/((float)mapWidth)*(zBC/deltaBC)))*grayLvl;
+            }
+        } else {
+            Node** tabEnfantOrdonne = (Node**) malloc(sizeof(Node*)*4);
+            orderChildren(*quadtree, tabEnfantOrdonne, camera);
+            drawTreeLOD(tabEnfantOrdonne[3], soleil, texture, camera, map, mapWidth, grayLvl, zFar, angleView);
+            drawTreeLOD(tabEnfantOrdonne[2], soleil, texture, camera, map, mapWidth, grayLvl, zFar, angleView);
+            drawTreeLOD(tabEnfantOrdonne[1], soleil, texture, camera, map, mapWidth, grayLvl, zFar, angleView);
+            drawTreeLOD(tabEnfantOrdonne[0], soleil, texture, camera, map, mapWidth, grayLvl, zFar, angleView);
         }
-        float deltaDC = (float) (iC - iD);
-        float zDC = C.z - D.z;
-        for (int i = iD; i<iC; i++) {
-            map[i] = (D.z + (i-iD)*(zDC/deltaDC))*grayLvl;
-        }
-        float deltaAD = (float) ((iD-iA)/mapWidth);
-        float zAD = D.z - A.z;
-        for (int i = iA; i<iD; i+= mapWidth) {
-            map[i] = (A.z + ((i-iA)/((float)mapWidth)*(zAD/deltaAD)))*grayLvl;
-        }
-        float deltaBC = (float) ((iC-iB)/mapWidth);
-        float zBC = C.z - B.z;
-        for (int i = iB; i<iC; i+= mapWidth) {
-            map[i] = (B.z + ((i-iB)/((float)mapWidth)*(zBC/deltaBC)))*grayLvl;
-        }
-    } else {
-        Node** tabEnfantOrdonne = (Node**) malloc(sizeof(Node*)*4);
-        orderChildren(*quadtree, tabEnfantOrdonne, camera);
-        drawTreeLOD(tabEnfantOrdonne[3], soleil, texture, camera, map, mapWidth, grayLvl);
-        drawTreeLOD(tabEnfantOrdonne[2], soleil, texture, camera, map, mapWidth, grayLvl);
-        drawTreeLOD(tabEnfantOrdonne[1], soleil, texture, camera, map, mapWidth, grayLvl);
-        drawTreeLOD(tabEnfantOrdonne[0], soleil, texture, camera, map, mapWidth, grayLvl);
     }
 }
 
@@ -211,7 +214,7 @@ void drawTreeLines(Node* quadtree) {
 // Affichage filaire avec LOD
 void drawTreeLinesLOD(Node* quadtree, Camera camera, float* map, int mapWidth, float grayLvl) {
     float thickness = norm(createVectorFromPoints(quadtree->pointA, quadtree->pointB));
-    
+
     if (quadtree->isLeaf()) {
         updateZ(quadtree, map, mapWidth, grayLvl);
         drawTrianglesLines(*quadtree, thickness);
@@ -581,4 +584,65 @@ float distanceFromQuad(Node quadtree, Camera camera) {
     float distance2 = norm(createVectorFromPoints(camera.posCam,plusProcheTest2));
 
     return min(distance1, distance2);
+}
+
+int FrustumCulling(Camera cam, float zFar, float angleView, Node node) {
+    Vector3D dirRegard = createVectorFromPoints(cam.posCam, cam.viseCam);
+    dirRegard.z = 0.;
+    dirRegard = normalize(dirRegard);
+    float teta = ((angleView/2.)/180)*M_PI;
+    float distancePA = zFar/cos(teta);
+    Vector3D PA = multVector(dirRegard, distancePA);
+
+    // Calcul des deux autres points du triangle de vue (en + de la position de la caméra)
+    Point3D A,B;
+    A.x = cos(teta)*PA.x-sin(teta)*PA.y;
+    A.y = sin(teta)*PA.x+PA.y*cos(teta);
+    A = addVectors(A, cam.posCam);
+    A.z = 0.;
+    B.x = cos(teta)*PA.x+sin(teta)*PA.y;
+    B.y = -sin(teta)*PA.x+PA.y*cos(teta);
+    B = addVectors(B, cam.posCam);
+    B.z = 0.;
+
+    //Calculs des vecteurs normaux aux cotés du triangle
+    Vector3D nFar = multVector(dirRegard, -1.);
+    Vector3D nPA = createVector(A.y, -A.x, 0.);
+    Vector3D nPB = createVector(-B.y, B.x, 0.);
+
+    //Définition des points du node en 2D
+    Point3D pt1 = createPoint(node.pointA.x, node.pointA.y, 0.);
+    Point3D pt2 = createPoint(node.pointB.x, node.pointB.y, 0.);
+    Point3D pt3 = createPoint(node.pointC.x, node.pointC.y, 0.);
+    Point3D pt4 = createPoint(node.pointD.x, node.pointD.y, 0.);
+
+    //Tests droite 1 (les 4 points sont ils du "bon" coté ?)
+    float pt1d1 = dot(createVectorFromPoints(A, pt1), nFar);
+    float pt2d1 = dot(createVectorFromPoints(A, pt2), nFar);
+    float pt3d1 = dot(createVectorFromPoints(A, pt3), nFar);
+    float pt4d1 = dot(createVectorFromPoints(A, pt4), nFar);
+        if (pt1d1 < 0 && pt2d1 < 0 && pt3d1 < 0 && pt4d1 < 0){
+            return 0; // la forme n'est pas visible
+        } else {
+            //Tests droite 2 (les 4 points sont ils du "bon" coté ?)
+            float pt1d2 = dot(createVectorFromPoints(cam.posCam, pt1), nPA);
+            float pt2d2 = dot(createVectorFromPoints(cam.posCam, pt2), nPA);
+            float pt3d2 = dot(createVectorFromPoints(cam.posCam, pt3), nPA);
+            float pt4d2 = dot(createVectorFromPoints(cam.posCam, pt4), nPA);
+                if (pt1d2 < 0 && pt2d2 < 0 && pt3d2 < 0 && pt4d2 < 0){
+                    return 0; // la forme n'est pas visible
+                } else {
+                    //Tests droite 3 (les 4 points sont ils du "bon" coté ?)
+                    float pt1d3 = dot(createVectorFromPoints(cam.posCam, pt1), nPB);
+                    float pt2d3 = dot(createVectorFromPoints(cam.posCam, pt2), nPB);
+                    float pt3d3 = dot(createVectorFromPoints(cam.posCam, pt3), nPB);
+                    float pt4d3 = dot(createVectorFromPoints(cam.posCam, pt4), nPB);
+                        if (pt1d3 < 0 && pt2d3 < 0 && pt3d3 < 0 && pt4d3 < 0){
+                            return 0; // la forme n'est pas visible
+                        } 
+                }
+            }
+    // Sinon la forme est visible
+    return 1;
+
 }

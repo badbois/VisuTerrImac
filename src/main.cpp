@@ -387,7 +387,7 @@ int main(int argc, char** argv)
         if (switchWireframe == 0) {
             couleurCiel = createColor(0.5, 0.5, 0.9);
             //drawTree(quadtree, Soleil, grass);
-            drawTreeLOD(quadtree, Soleil, textureId, camera, mapCopy, width, grayLvl);
+            drawTreeLOD(quadtree, Soleil, textureId, camera, mapCopy, width, grayLvl, farView, angleView);
         } else {
             couleurCiel = createColor(0., 0., 0.1);
             drawTreeLinesLOD(quadtree,camera, mapCopy, width, grayLvl);
