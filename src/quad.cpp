@@ -585,7 +585,7 @@ float distanceFromQuad(Node quadtree, Camera camera) {
 
     return min(distance1, distance2);
 }
-
+/*
 int FrustumCulling(Camera cam, float zFar, float angleView, Node node) {
     Vector3D dirRegard = createVectorFromPoints(cam.posCam, cam.viseCam);
     dirRegard.z = 0.;
@@ -637,6 +637,60 @@ int FrustumCulling(Camera cam, float zFar, float angleView, Node node) {
                     float pt2d3 = dot(createVectorFromPoints(cam.posCam, pt2), nPB);
                     float pt3d3 = dot(createVectorFromPoints(cam.posCam, pt3), nPB);
                     float pt4d3 = dot(createVectorFromPoints(cam.posCam, pt4), nPB);
+                        if (pt1d3 < 0 && pt2d3 < 0 && pt3d3 < 0 && pt4d3 < 0){
+                            return 0; // la forme n'est pas visible
+                        } 
+                }
+            }
+    // Sinon la forme est visible
+    return 1;
+
+}
+*/
+
+int FrustumCulling(Camera cam, float zFar, float angleView, Node node) {
+    Vector3D dirRegard = createVectorFromPoints(cam.posCam, cam.viseCam);
+    dirRegard = normalize(dirRegard);
+    Vector3D chemin1 = multVector(dirRegard, zFar);
+    float teta = ((angleView/2.)/180)*M_PI;
+    float ecart = tan(teta)*zFar;
+    Vector3D ciel = createVector(0.,0.,1.);
+    Vector3D left = produitVectoriel(dirRegard, ciel);
+    Vector3D chemin2 = multVector(normalize(left), ecart);
+    
+    // A et B sont les deux autres points du "triangle visible" en plus de la camera
+    Point3D A = addVectors(cam.posCam, addVectors(chemin1, chemin2));
+    Vector3D PA = createVectorFromPoints(cam.posCam, A);
+    Point3D B = addVectors(cam.posCam, addVectors(chemin1, multVector(chemin2, -1.)));
+    Vector3D PB = createVectorFromPoints(cam.posCam, B);
+    Vector3D up = produitVectoriel(dirRegard, left);
+
+    //Calculs des vecteurs normaux aux plans droite, gauche, loin
+    Vector3D nFar = multVector(dirRegard, -1.);
+    Vector3D nPA = produitVectoriel(PA, up);
+    Vector3D nPB = produitVectoriel(up, PB);
+
+    //Tests droite 1 (les 4 points sont ils du "bon" coté ?)
+    float pt1d1 = dot(createVectorFromPoints(A, node.pointA), nFar);
+    float pt2d1 = dot(createVectorFromPoints(A, node.pointB), nFar);
+    float pt3d1 = dot(createVectorFromPoints(A, node.pointC), nFar);
+    float pt4d1 = dot(createVectorFromPoints(A, node.pointD), nFar);
+        if (pt1d1 < 0 && pt2d1 < 0 && pt3d1 < 0 && pt4d1 < 0){
+            return 0; // la forme n'est pas visible
+        } else {
+            //Tests droite 2 (les 4 points sont ils du "bon" coté ?)
+            float pt1d2 = dot(createVectorFromPoints(cam.posCam, node.pointA), nPA);
+            float pt2d2 = dot(createVectorFromPoints(cam.posCam, node.pointB), nPA);
+            float pt3d2 = dot(createVectorFromPoints(cam.posCam, node.pointC), nPA);
+            float pt4d2 = dot(createVectorFromPoints(cam.posCam, node.pointD), nPA);
+                if (pt1d2 < 0 && pt2d2 < 0 && pt3d2 < 0 && pt4d2 < 0){
+                    return 0; // la forme n'est pas visible
+                } else {
+                    //Tests droite 3 (les 4 points sont ils du "bon" coté ?)
+                    float pt1d3 = dot(createVectorFromPoints(cam.posCam, node.pointA), nPB);
+                    float pt2d3 = dot(createVectorFromPoints(cam.posCam, node.pointB), nPB);
+                    float pt3d3 = dot(createVectorFromPoints(cam.posCam, node.pointC), nPB);
+                    float pt4d3 = dot(createVectorFromPoints(cam.posCam, node.pointD), nPB);
                         if (pt1d3 < 0 && pt2d3 < 0 && pt3d3 < 0 && pt4d3 < 0){
                             return 0; // la forme n'est pas visible
                         } 

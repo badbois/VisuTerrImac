@@ -52,6 +52,7 @@ int switchWireframe = 0;
 
 //gluPerspective et frustum culling
 float angleView = 50.0;
+float angleHorizontal = 50.0; 
 float farView = 100.0;
 
 /* Nombre minimal de millisecondes separant le rendu de deux images */
@@ -67,6 +68,10 @@ void onWindowResized(unsigned int width, unsigned int height, Camera camera)
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity(); 
     
+    float angleViewRad = (angleView/180)*M_PI;
+    angleHorizontal = 2.0 * atan(tan(angleViewRad * 0.5) * aspectRatio); 
+    angleHorizontal = (angleHorizontal/M_PI)*180;
+
     /*
     if( aspectRatio > 1) 
     {
@@ -123,45 +128,80 @@ void drawOrigin()
     glColor3fv(currentColor);
 }
 
-void drawCenteredBox(float length, ColorRGB couleurCiel) 
+void drawCenteredBox(float length, ColorRGB couleurCiel, GLuint* textureSky) 
 {
     float currentColor[4];
     glGetFloatv(GL_CURRENT_COLOR,currentColor);
-
-    glBegin(GL_QUADS);
+    glEnable(GL_TEXTURE_2D);
+    
     float l = length/2;
-
-    glColor3f(couleurCiel.r, couleurCiel.g, couleurCiel.b);
+    glColor3f(1., 1., 1.);
+    //glColor3f(couleurCiel.r, couleurCiel.g, couleurCiel.b);
+    glBindTexture(GL_TEXTURE_2D, textureSky[1]);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.,1.);
     glVertex3f(-l , l, -l);
+    glTexCoord2f(0.,0.);
     glVertex3f(-l , l, l);
+    glTexCoord2f(1.,0.);
     glVertex3f(-l , -l, l);
+    glTexCoord2f(1.,1.);
     glVertex3f(-l , -l, -l);
 
+    glTexCoord2f(1.,1.);
     glVertex3f(-l , l, -l);
+    glTexCoord2f(1.,0.);
     glVertex3f(-l , l, l);
+    glTexCoord2f(0.,0.);
     glVertex3f(l , l, l);
+    glTexCoord2f(0.,1.);
     glVertex3f(l , l, -l);
 
+    glTexCoord2f(1.,1.);
     glVertex3f(l , -l, -l);
+    glTexCoord2f(1.,0.);
     glVertex3f(l , -l, l);
+    glTexCoord2f(0.,0.);
     glVertex3f(l , l, l);
+    glTexCoord2f(0.,1.);
     glVertex3f(l , l, -l);
 
+    glTexCoord2f(1.,1.);
     glVertex3f(l , -l, -l);
+    glTexCoord2f(1.,0.);
     glVertex3f(l , -l, l);
+    glTexCoord2f(0.,0.);
     glVertex3f(-l , -l, l);
+    glTexCoord2f(0.,1.);
     glVertex3f(-l , -l, -l);
+    glEnd();
 
+    glBindTexture(GL_TEXTURE_2D, textureSky[1]);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.,0.);
     glVertex3f(-l , -l, -l);
+    glTexCoord2f(1.,0.);
     glVertex3f(-l , l, -l);
+    glTexCoord2f(1.,1.);
     glVertex3f(l , l, -l);
+    glTexCoord2f(0.,1.);
     glVertex3f(l , -l, -l);
+    glEnd();
 
+    glBindTexture(GL_TEXTURE_2D, textureSky[1]);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.,0.);
     glVertex3f(-l , -l, l);
+    glTexCoord2f(1.,0.);
     glVertex3f(-l , l, l);
+    glTexCoord2f(1.,1.);
     glVertex3f(l , l, l);
+    glTexCoord2f(0.,1.);
     glVertex3f(l , -l, l);
     
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glDisable(GL_TEXTURE_2D);   
+
     glEnd();
 
     glColor3fv(currentColor);
@@ -276,7 +316,7 @@ int main(int argc, char** argv)
 
     // Texture
 
-    char* name[]={"assets/sandstone.jpg","assets/dirt.jpg", "assets/grass.jpg", "assets/rock.jpg","assets/snow.jpg"};
+    char* name[]={"assets/grass_5.jpg","assets/grass_4.jpg", "assets/grass_3.jpg", "assets/grass_2.jpg","assets/grass_1.jpg"};
     GLuint textureId[5];
 
     for(int i=0; i<5; i++){
@@ -290,6 +330,20 @@ int main(int argc, char** argv)
         glBindTexture(GL_TEXTURE_2D, 0);        
     }
 
+    //Ciel
+    
+    char* nameSky[]={"assets/skybox.jpg","assets/skybox_top.jpg", "assets/skybox_bot.jpg"};
+    GLuint textureSky[3];
+    for(int i=0; i<3; i++){
+        SDL_Surface* imageSky=IMG_Load(nameSky[i]);
+        if(!imageSky){
+        }
+        glGenTextures(1, &textureSky[i]);
+        glBindTexture(GL_TEXTURE_2D, textureSky[i]);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imageSky->w, imageSky->h, 0, GL_RGB, GL_UNSIGNED_BYTE, imageSky->pixels);
+        glBindTexture(GL_TEXTURE_2D, 0);        
+    }
 
 
     // Image billboard
@@ -360,7 +414,7 @@ int main(int argc, char** argv)
         glPushMatrix();
         glDepthMask(GL_FALSE);
         glTranslatef(camera.posCam.x, camera.posCam.y, camera.posCam.z);
-        drawCenteredBox(5., couleurCiel);
+        drawCenteredBox(5., couleurCiel, textureSky);
         //glRotatef(180, 0.,0.,1.);
         //drawCenteredBox(1., couleurCiel);
         glDepthMask(GL_TRUE);
@@ -388,7 +442,7 @@ int main(int argc, char** argv)
         if (switchWireframe == 0) {
             couleurCiel = createColor(0.5, 0.5, 0.9);
             //drawTree(quadtree, Soleil, grass);
-            drawTreeLOD(quadtree, Soleil, textureId, camera, mapCopy, width, grayLvl, farView, angleView);
+            drawTreeLOD(quadtree, Soleil, textureId, camera, mapCopy, width, grayLvl, farView, angleHorizontal);
         } else {
             couleurCiel = createColor(0., 0., 0.1);
             drawTreeLinesLOD(quadtree,camera, mapCopy, width, grayLvl);
