@@ -238,7 +238,7 @@ int main(int argc, char** argv)
     Point3D trucC = createPoint((float)(height-1), (float)(width-1), 0.);
     Point3D trucD = createPoint((float)(height-1),0.,0.);
 
-    Node* quadtree = createTree(trucA,trucB,trucC,trucD,map,width,0, (float)grayLvl);
+    Node* quadtree = createTree(trucA,trucB,trucC,trucD,map,width, height, 0, (float)grayLvl);
     printPoint3D(quadtree->pointA);
     printPoint3D(quadtree->pointB);
     printPoint3D(quadtree->pointC);
@@ -442,10 +442,10 @@ int main(int argc, char** argv)
         if (switchWireframe == 0) {
             couleurCiel = createColor(0.5, 0.5, 0.9);
             //drawTree(quadtree, Soleil, grass);
-            drawTreeLOD(quadtree, Soleil, textureId, camera, mapCopy, width, grayLvl, farView, angleHorizontal);
+            drawTreeLOD(quadtree, Soleil, textureId, camera, mapCopy, width,height, grayLvl, farView, angleHorizontal);
         } else {
             couleurCiel = createColor(0., 0., 0.1);
-            drawTreeLinesLOD(quadtree,camera, mapCopy, width, grayLvl);
+            drawTreeLinesLOD(quadtree,camera, mapCopy, width, height, grayLvl);
         }
         glPopMatrix();
         

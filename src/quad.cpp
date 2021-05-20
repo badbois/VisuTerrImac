@@ -99,25 +99,25 @@ void drawTree(Node* quadtree, Light soleil, GLuint texture[]) {
     }
 }
 
-void drawTreeLOD(Node* quadtree, Light soleil, GLuint texture[], Camera camera, float* map, int mapWidth, float grayLvl, float zFar, float angleView) {
+void drawTreeLOD(Node* quadtree, Light soleil, GLuint texture[], Camera camera, float* map, int mapWidth, int mapHeight,float grayLvl, float zFar, float angleView) {
     if (FrustumCulling(camera, zFar, angleView, *quadtree) == 1) {
         if (quadtree->isLeaf()) {
-            updateZ(quadtree, map, mapWidth, grayLvl);
+            updateZ(quadtree, map, mapWidth, mapHeight, grayLvl);
             drawTriangles(*quadtree, soleil, texture);
         } else if (distanceFromQuad(*quadtree, camera)>(2*mapWidth/(quadtree->depth+1))) {
-            updateZ(quadtree, map, mapWidth, grayLvl);
+            updateZ(quadtree, map, mapWidth,mapHeight,  grayLvl);
             drawTriangles(*quadtree, soleil, texture);
 
             //Modification de la map pour éviter les cracks
             //iA, iB, iC, iD : indice des points dans la map
             Point3D A = quadtree->pointA;
-            int iA = A.x*mapWidth+A.y;
+            int iA = (A.x+mapWidth/2)*mapWidth+(A.y+mapHeight/2);
             Point3D B = quadtree->pointB;
-            int iB = B.x*mapWidth+B.y;
+            int iB = (B.x+mapWidth/2)*mapWidth+(B.y+mapHeight/2);
             Point3D C = quadtree->pointC;
-            int iC = C.x*mapWidth+C.y;
+            int iC = (C.x+mapWidth/2)*mapWidth+(C.y+mapHeight/2);
             Point3D D = quadtree->pointD;
-            int iD = D.x*mapWidth+D.y;
+            int iD = (D.x+mapWidth/2)*mapWidth+(D.y+mapHeight/2);
 
             float deltaAB = (float) (iB - iA);
             float zAB = B.z - A.z;
@@ -142,29 +142,29 @@ void drawTreeLOD(Node* quadtree, Light soleil, GLuint texture[], Camera camera, 
         } else {
             Node** tabEnfantOrdonne = (Node**) malloc(sizeof(Node*)*4);
             orderChildren(*quadtree, tabEnfantOrdonne, camera);
-            drawTreeLOD(tabEnfantOrdonne[3], soleil, texture, camera, map, mapWidth, grayLvl, zFar, angleView);
-            drawTreeLOD(tabEnfantOrdonne[2], soleil, texture, camera, map, mapWidth, grayLvl, zFar, angleView);
-            drawTreeLOD(tabEnfantOrdonne[1], soleil, texture, camera, map, mapWidth, grayLvl, zFar, angleView);
-            drawTreeLOD(tabEnfantOrdonne[0], soleil, texture, camera, map, mapWidth, grayLvl, zFar, angleView);
+            drawTreeLOD(tabEnfantOrdonne[3], soleil, texture, camera, map, mapWidth, mapHeight, grayLvl, zFar, angleView);
+            drawTreeLOD(tabEnfantOrdonne[2], soleil, texture, camera, map, mapWidth, mapHeight, grayLvl, zFar, angleView);
+            drawTreeLOD(tabEnfantOrdonne[1], soleil, texture, camera, map, mapWidth, mapHeight, grayLvl, zFar, angleView);
+            drawTreeLOD(tabEnfantOrdonne[0], soleil, texture, camera, map, mapWidth, mapHeight, grayLvl, zFar, angleView);
         }
     }
 }
 
-void updateZ (Node* quadtree, float*map, int mapWidth, float grayLvl) {
+void updateZ (Node* quadtree, float*map, int mapWidth, int mapHeight, float grayLvl) {
     Point3D A = quadtree->pointA;
-    int iA = A.x*mapWidth+A.y;
+    int iA = (A.x+mapWidth/2)*mapWidth+(A.y+mapHeight/2);
     quadtree->pointA.z = map[iA]/grayLvl;
 
     Point3D B = quadtree->pointB;
-    int iB = B.x*mapWidth+B.y;
+    int iB = (B.x+mapWidth/2)*mapWidth+(B.y+mapHeight/2);
     quadtree->pointB.z = map[iB]/grayLvl;
 
     Point3D C = quadtree->pointC;
-    int iC = C.x*mapWidth+C.y;
+    int iC = (C.x+mapWidth/2)*mapWidth+(C.y+mapHeight/2);
     quadtree->pointC.z = map[iC]/grayLvl;
 
     Point3D D = quadtree->pointD;
-    int iD = D.x*mapWidth+D.y;
+    int iD = (D.x+mapWidth/2)*mapWidth+(D.y+mapHeight/2);
     quadtree->pointD.z = map[iD]/grayLvl;
 }
 
@@ -212,26 +212,26 @@ void drawTreeLines(Node* quadtree) {
 }
 
 // Affichage filaire avec LOD
-void drawTreeLinesLOD(Node* quadtree, Camera camera, float* map, int mapWidth, float grayLvl) {
+void drawTreeLinesLOD(Node* quadtree, Camera camera, float* map, int mapWidth, int mapHeight, float grayLvl) {
     float thickness = norm(createVectorFromPoints(quadtree->pointA, quadtree->pointB));
 
     if (quadtree->isLeaf()) {
-        updateZ(quadtree, map, mapWidth, grayLvl);
+        updateZ(quadtree, map, mapWidth, mapHeight, grayLvl);
         drawTrianglesLines(*quadtree, thickness);
     } else if (distanceFromQuad(*quadtree, camera)>(2*mapWidth/(quadtree->depth+1))) {
-        updateZ(quadtree, map, mapWidth, grayLvl);
+        updateZ(quadtree, map, mapWidth, mapHeight, grayLvl);
         drawTrianglesLines(*quadtree, thickness);
 
         //Modification de la map pour éviter les cracks
         //iA, iB, iC, iD : indice des points dans la map
         Point3D A = quadtree->pointA;
-        int iA = A.x*mapWidth+A.y;
+        int iA = (A.x+mapWidth/2)*mapWidth+(A.y+mapHeight/2);
         Point3D B = quadtree->pointB;
-        int iB = B.x*mapWidth+B.y;
+        int iB = (B.x+mapWidth/2)*mapWidth+(B.y+mapHeight/2);
         Point3D C = quadtree->pointC;
-        int iC = C.x*mapWidth+C.y;
+        int iC = (C.x+mapWidth/2)*mapWidth+(C.y+mapHeight/2);
         Point3D D = quadtree->pointD;
-        int iD = D.x*mapWidth+D.y;
+        int iD = (D.x+mapWidth/2)*mapWidth+(D.y+mapHeight/2);
 
         float deltaAB = (float) (iB - iA);
         float zAB = B.z - A.z;
@@ -256,10 +256,10 @@ void drawTreeLinesLOD(Node* quadtree, Camera camera, float* map, int mapWidth, f
     } else {
         Node** tabEnfantOrdonne = (Node**) malloc(sizeof(Node*)*4);
         orderChildren(*quadtree, tabEnfantOrdonne, camera);
-        drawTreeLinesLOD(tabEnfantOrdonne[3], camera, map, mapWidth, grayLvl);
-        drawTreeLinesLOD(tabEnfantOrdonne[2], camera, map, mapWidth, grayLvl);
-        drawTreeLinesLOD(tabEnfantOrdonne[1], camera, map, mapWidth, grayLvl);
-        drawTreeLinesLOD(tabEnfantOrdonne[0], camera, map, mapWidth, grayLvl);
+        drawTreeLinesLOD(tabEnfantOrdonne[3], camera, map, mapWidth, mapHeight, grayLvl);
+        drawTreeLinesLOD(tabEnfantOrdonne[2], camera, map, mapWidth, mapHeight, grayLvl);
+        drawTreeLinesLOD(tabEnfantOrdonne[1], camera, map, mapWidth, mapHeight, grayLvl);
+        drawTreeLinesLOD(tabEnfantOrdonne[0], camera, map, mapWidth, mapHeight, grayLvl);
     }
 }
 

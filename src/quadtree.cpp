@@ -207,7 +207,7 @@ void ajustePointsEnfants (float x1, float x2, float* X, float* correction) {
 
 // Version où on arrondit au dessus
 
-Node* createTree(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD, int *map, int mapWidth, int depth, float grayLvl){ //PAS FINI
+Node* createTree(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD, int *map, int mapWidth, int mapHeight,int depth, float grayLvl){ //PAS FINI
     
     //recuperation des coord Z des points
     getZ(&pointA, map, mapWidth, grayLvl);
@@ -234,11 +234,21 @@ Node* createTree(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD,
         Point3D pointCentre=createPoint(BCx, ABy, 0);
 
         //Creation des 4 enfants 
-        newNode->topLeft = createTree(pointA, pointAB, pointCentre, pointDA, map, mapWidth, depth+1, grayLvl);
-        newNode->topRight = createTree(pointAB, pointB, pointBC, pointCentre, map, mapWidth, depth+1, grayLvl);
-        newNode->botRight = createTree(pointCentre, pointBC, pointC, pointCD, map, mapWidth, depth+1, grayLvl);
-        newNode->botLeft = createTree(pointDA, pointCentre, pointCD, pointD, map, mapWidth, depth+1, grayLvl);
+        newNode->topLeft = createTree(pointA, pointAB, pointCentre, pointDA, map, mapWidth, mapHeight, depth+1, grayLvl);
+        newNode->topRight = createTree(pointAB, pointB, pointBC, pointCentre, map, mapWidth, mapHeight, depth+1, grayLvl);
+        newNode->botRight = createTree(pointCentre, pointBC, pointC, pointCD, map, mapWidth, mapHeight, depth+1, grayLvl);
+        newNode->botLeft = createTree(pointDA, pointCentre, pointCD, pointD, map, mapWidth, mapHeight, depth+1, grayLvl);
     }
+
+    newNode->pointA.x = pointA.x-mapWidth/2;
+    newNode->pointB.x = pointB.x-mapWidth/2;
+    newNode->pointC.x = pointC.x-mapWidth/2;
+    newNode->pointD.x = pointD.x-mapWidth/2;
+    
+    newNode->pointA.y = pointA.y-mapHeight/2;
+    newNode->pointB.y = pointB.y-mapHeight/2;
+    newNode->pointC.y = pointC.y-mapHeight/2;
+    newNode->pointD.y = pointD.y-mapHeight/2;
 
     return newNode;
 }
