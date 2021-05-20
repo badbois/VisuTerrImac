@@ -240,15 +240,15 @@ Node* createTree(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD,
         newNode->botLeft = createTree(pointDA, pointCentre, pointCD, pointD, map, mapWidth, mapHeight, depth+1, grayLvl);
     }
 
-    newNode->pointA.x = pointA.x-mapWidth/2;
-    newNode->pointB.x = pointB.x-mapWidth/2;
-    newNode->pointC.x = pointC.x-mapWidth/2;
-    newNode->pointD.x = pointD.x-mapWidth/2;
+    newNode->pointA.x = pointA.x-mapWidth/2.;
+    newNode->pointB.x = pointB.x-mapWidth/2.;
+    newNode->pointC.x = pointC.x-mapWidth/2.;
+    newNode->pointD.x = pointD.x-mapWidth/2.;
     
-    newNode->pointA.y = pointA.y-mapHeight/2;
-    newNode->pointB.y = pointB.y-mapHeight/2;
-    newNode->pointC.y = pointC.y-mapHeight/2;
-    newNode->pointD.y = pointD.y-mapHeight/2;
+    newNode->pointA.y = pointA.y-mapHeight/2.;
+    newNode->pointB.y = pointB.y-mapHeight/2.;
+    newNode->pointC.y = pointC.y-mapHeight/2.;
+    newNode->pointD.y = pointD.y-mapHeight/2.;
 
     return newNode;
 }

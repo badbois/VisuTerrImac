@@ -111,13 +111,13 @@ void drawTreeLOD(Node* quadtree, Light soleil, GLuint texture[], Camera camera, 
             //Modification de la map pour éviter les cracks
             //iA, iB, iC, iD : indice des points dans la map
             Point3D A = quadtree->pointA;
-            int iA = (A.x+mapWidth/2)*mapWidth+(A.y+mapHeight/2);
+            int iA = (A.x+mapWidth/2.)*mapWidth+(A.y+mapHeight/2.);
             Point3D B = quadtree->pointB;
-            int iB = (B.x+mapWidth/2)*mapWidth+(B.y+mapHeight/2);
+            int iB = (B.x+mapWidth/2.)*mapWidth+(B.y+mapHeight/2.);
             Point3D C = quadtree->pointC;
-            int iC = (C.x+mapWidth/2)*mapWidth+(C.y+mapHeight/2);
+            int iC = (C.x+mapWidth/2.)*mapWidth+(C.y+mapHeight/2.);
             Point3D D = quadtree->pointD;
-            int iD = (D.x+mapWidth/2)*mapWidth+(D.y+mapHeight/2);
+            int iD = (D.x+mapWidth/2.)*mapWidth+(D.y+mapHeight/2.);
 
             float deltaAB = (float) (iB - iA);
             float zAB = B.z - A.z;
@@ -152,19 +152,19 @@ void drawTreeLOD(Node* quadtree, Light soleil, GLuint texture[], Camera camera, 
 
 void updateZ (Node* quadtree, float*map, int mapWidth, int mapHeight, float grayLvl) {
     Point3D A = quadtree->pointA;
-    int iA = (A.x+mapWidth/2)*mapWidth+(A.y+mapHeight/2);
+    int iA = (A.x+mapWidth/2.)*mapWidth+(A.y+mapHeight/2.);
     quadtree->pointA.z = map[iA]/grayLvl;
 
     Point3D B = quadtree->pointB;
-    int iB = (B.x+mapWidth/2)*mapWidth+(B.y+mapHeight/2);
+    int iB = (B.x+mapWidth/2.)*mapWidth+(B.y+mapHeight/2.);
     quadtree->pointB.z = map[iB]/grayLvl;
 
     Point3D C = quadtree->pointC;
-    int iC = (C.x+mapWidth/2)*mapWidth+(C.y+mapHeight/2);
+    int iC = (C.x+mapWidth/2.)*mapWidth+(C.y+mapHeight/2.);
     quadtree->pointC.z = map[iC]/grayLvl;
 
     Point3D D = quadtree->pointD;
-    int iD = (D.x+mapWidth/2)*mapWidth+(D.y+mapHeight/2);
+    int iD = (D.x+mapWidth/2.)*mapWidth+(D.y+mapHeight/2.);
     quadtree->pointD.z = map[iD]/grayLvl;
 }
 
@@ -225,13 +225,13 @@ void drawTreeLinesLOD(Node* quadtree, Camera camera, float* map, int mapWidth, i
         //Modification de la map pour éviter les cracks
         //iA, iB, iC, iD : indice des points dans la map
         Point3D A = quadtree->pointA;
-        int iA = (A.x+mapWidth/2)*mapWidth+(A.y+mapHeight/2);
+        int iA = (A.x+mapWidth/2.)*mapWidth+(A.y+mapHeight/2.);
         Point3D B = quadtree->pointB;
-        int iB = (B.x+mapWidth/2)*mapWidth+(B.y+mapHeight/2);
+        int iB = (B.x+mapWidth/2.)*mapWidth+(B.y+mapHeight/2.);
         Point3D C = quadtree->pointC;
-        int iC = (C.x+mapWidth/2)*mapWidth+(C.y+mapHeight/2);
+        int iC = (C.x+mapWidth/2.)*mapWidth+(C.y+mapHeight/2.);
         Point3D D = quadtree->pointD;
-        int iD = (D.x+mapWidth/2)*mapWidth+(D.y+mapHeight/2);
+        int iD = (D.x+mapWidth/2.)*mapWidth+(D.y+mapHeight/2.);
 
         float deltaAB = (float) (iB - iA);
         float zAB = B.z - A.z;
@@ -282,7 +282,7 @@ Vector3D normaleTriangle (Point3D s1, Point3D s2, Point3D s3) {
 }
 
 ColorRGB illuminationLambert(Point3D s1, Point3D s2, Point3D s3, Light Soleil) {
-    ColorRGB couleurPoint = createColor(0.,0.,0.);
+    ColorRGB couleurPoint = createColor(0.1,0.,0.3);
     ColorRGB blanc = createColor(1.,1.,1.);
     Vector3D normale = normaleTriangle (s1, s2, s3);
     float facteur = dot(normale, Soleil.rayon);
@@ -699,4 +699,86 @@ int FrustumCulling(Camera cam, float zFar, float angleView, Node node) {
     // Sinon la forme est visible
     return 1;
 
+}
+
+void drawBillboard(float phi, GLuint texture, Point3D scale) {
+            glRotatef(phi*(360/6.18),0.,0.,1.);
+            glScalef(scale.x,scale.y,scale.z);
+            // printf("%f \n", phi);
+            glEnable(GL_TEXTURE_2D);
+            glBindTexture(GL_TEXTURE_2D, texture);
+            glBegin(GL_QUADS);
+
+                glColor3f(1.,1.,1.);
+
+                glTexCoord2f(0.,0.);
+                glVertex3f(0.,-0.5,1.);
+
+                glTexCoord2f(1.,0.);
+                glVertex3f(0.,0.5,1.);
+
+                glTexCoord2f(1.,1.);
+                glVertex3f(0.,0.5,0.);
+
+                glTexCoord2f(0.,1.);
+                glVertex3f(0.,-0.5,0.);
+
+            glEnd();
+            glBindTexture(GL_TEXTURE_2D, 0);
+            glDisable(GL_TEXTURE_2D);
+}
+
+float clamp(float x, float bot,float top) {
+    return max(min(top,x), bot);
+}
+
+float computeZ (float x, float y, float* map, int mapWidth, int mapHeight, float grayLvl) {
+    if (abs(x)>mapWidth/2. || abs(y)>mapHeight) {
+        return 0;
+    }
+    
+    int i = floor(x+(mapWidth/2.));
+    int l = ceil(x+(mapWidth/2.));
+
+    if (i==l){
+        l++;
+    }
+
+    int j = floor(y+(mapHeight/2.));
+    int k = ceil(y+(mapHeight/2.));
+
+    if (j==k){
+        k++;
+    }
+
+    float xDecimal = x-floor(x);
+    float yDecimal = y-floor(y);
+
+    Point3D A = createPoint((i-mapWidth/2.), (j-mapHeight/2.), map[i*mapWidth+j]);
+    Point3D B = createPoint((i-mapWidth/2.), (k-mapHeight/2.), map[i*mapWidth+k]);
+    Point3D C = createPoint((l-mapWidth/2.), (k-mapHeight/2.), map[l*mapWidth+k]);
+    Point3D D = createPoint((l-mapWidth/2.), (j-mapHeight/2.), map[l*mapWidth+j]);
+/*
+    cout << " A ";
+    printPoint3D(A);
+    cout << " B ";
+    printPoint3D(B);
+    cout << " C ";
+    printPoint3D(C);
+    cout << " D ";
+    printPoint3D(D);*/
+
+    float Z;
+
+    if (xDecimal>yDecimal) { // on est dans le triangle du bas du noeud : ACD
+        Vector3D nPlan = produitVectoriel(createVectorFromPoints(D,C), createVectorFromPoints(D,A));
+        float d = A.x*nPlan.x+A.y*nPlan.y+A.z*nPlan.z;
+        Z = (-nPlan.x*x-nPlan.y*y+d)/nPlan.z;
+    } else { //on est dans le triangle en haut : ABC
+        Vector3D nPlan = produitVectoriel(createVectorFromPoints(B,A), createVectorFromPoints(B,C));
+        float d = A.x*nPlan.x+A.y*nPlan.y+A.z*nPlan.z;
+        Z = (-nPlan.x*x-nPlan.y*y+d)/nPlan.z;
+    }
+    
+    return Z/grayLvl;
 }

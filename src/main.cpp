@@ -38,6 +38,7 @@ static int flagCamPanLeft = 0;
 static int flagCamPanRight = 0;
 static int flagCamTiltUp = 0;
 static int flagCamTiltDown = 0;
+static int flagFPS = 0;
 
 // phi 3. pour etre aligné sur axe 
 static float phi = 3.;
@@ -398,13 +399,6 @@ int main(int argc, char** argv)
         ColorRGB couleurSoleil = createColor(2.,2.,2.);
         Light Soleil = createSun(rayonSoleil, couleurSoleil);
 
-        // Gestion caméra
-
-        camera = moveCamera(camera, flagCamUp, flagCamDown, flagCamLeft, flagCamRight,
-                            flagCamForward, flagCamBackward, flagCamTiltDown, flagCamTiltUp,
-                            flagCamPanLeft, flagCamPanRight, &teta, &phi);
-        onWindowResized(currentWidth, currentHeight, camera);
-
         /* Placer ici le code de dessin */
         glClear(GL_COLOR_BUFFER_BIT);
         glClear(GL_DEPTH_BUFFER_BIT);
@@ -468,35 +462,23 @@ int main(int argc, char** argv)
        
        
         glPushMatrix();
-            glPushMatrix();
-            glRotatef(phi*(360/6.18),0.,0.,1.);
-            // printf("%f \n", phi);
-            glEnable(GL_TEXTURE_2D);
-            glBindTexture(GL_TEXTURE_2D, bill);
-            glBegin(GL_QUADS);
-
-               // glColor3f(1.,0.,1.);
-
-                glTexCoord2f(0.,0.);
-                glVertex3f(0.,-0.5,1.);
-
-                glTexCoord2f(1.,0.);
-                glVertex3f(0.,0.5,1.);
-
-                glTexCoord2f(1.,1.);
-                glVertex3f(0.,0.5,0.);
-
-                glTexCoord2f(0.,1.);
-                glVertex3f(0.,-0.5,0.);
-
-            glEnd();
-            glBindTexture(GL_TEXTURE_2D, 0);
-            glDisable(GL_TEXTURE_2D);
-
-            glPopMatrix();
+        drawBillboard(phi, bill, createPoint(0.,3.,3.));
         glPopMatrix();
 
-        
+        // Gestion caméra
+
+        if(flagFPS==1) { // on désactive les mouvements vers le haut et bas
+            flagCamUp = 0; 
+            flagCamDown = 0;
+        }
+        camera = moveCamera(camera, flagCamUp, flagCamDown, flagCamLeft, flagCamRight,
+                            flagCamForward, flagCamBackward, flagCamTiltDown, flagCamTiltUp,
+                            flagCamPanLeft, flagCamPanRight, &teta, &phi);
+        if(flagFPS==1) {
+            camera.posCam.z = computeZ(camera.posCam.x, camera.posCam.y, mapCopy, width, height, grayLvl)+1.;
+        }
+        onWindowResized(currentWidth, currentHeight, camera);
+
         
         /* Echange du front et du back buffer : mise a jour de la fenetre */
         SDL_GL_SwapWindow(window);
@@ -588,7 +570,9 @@ int main(int argc, char** argv)
                     if (e.key.keysym.sym == 102) { // f (mode filaire)
                         switchWireframe = 1-switchWireframe;
                     }
-                    
+                    if (e.key.keysym.sym == 99) { // c camera (mode FPS)
+                        flagFPS = 1-flagFPS;
+                    }
                     break;
                 case SDL_KEYUP:
                     if (e.key.keysym.sym == 104) { //H (haut)

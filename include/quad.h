@@ -79,4 +79,8 @@ float determinantMatrixTwoTwo(float a, float b, float c, float d);
 
 int FrustumCulling(Camera cam, float zFar, float angleView, Node node);
 
+void drawBillboard(float phi, GLuint texture, Point3D scale);
+float clamp(float x, float bot,float top);
+float computeZ (float x, float y, float* map, int mapWidth, int mapHeight,float grayLvl);
+
 #endif /*QUAD_H*/
