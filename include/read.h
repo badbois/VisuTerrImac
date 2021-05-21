@@ -15,7 +15,13 @@ typedef struct {
     int Zfar;
 } Timac;
 
+typedef struct {
+    float grayLvlRatio; 
+}Pgm;
+
 Timac createTimac();
+
+Pgm createPgm();
 /*la fonction lectureFichier ouvre le .timac, remplis les variable ligne après ligne
 Le fichier doit contenir, dans l'ordre et avec une seul variable par ligne
 Le nom du fichier HeightMap, le Xsize, le Ysize, le Zmin, le Zmax, le Znear et enfin le Zfar

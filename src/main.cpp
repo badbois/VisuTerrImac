@@ -214,6 +214,7 @@ int main(int argc, char** argv)
     std::string nameHeightMap;
     int test;
     Timac timac=createTimac();
+    Pgm pgm=createPgm();
     int width, height, grayLvl;
     test=lectureFichier(&timac);
     if (!test){
@@ -224,6 +225,9 @@ int main(int argc, char** argv)
     if(map==NULL){
         return EXIT_FAILURE;
     };
+
+    pgm.grayLvlRatio=  2.;
+    grayLvl=grayLvl/pgm.grayLvlRatio;
     cout <<timac.nameHeightMap<<" "<<timac.Xsize <<" " << timac.Ysize <<" " << timac.Zmin <<" " << timac.Zmax <<" " << timac.Znear <<" " << timac.Zfar << endl;
     /*cout << width <<" "<< height<< " "<< grayLvl<< endl;
     for(int i=1; i<=(height*width); i++){
@@ -438,7 +442,7 @@ int main(int argc, char** argv)
         if (switchWireframe == 0) {
             couleurCiel = createColor(0.5, 0.5, 0.9);
             //drawTree(quadtree, Soleil, grass);
-            drawTreeLOD(quadtree, Soleil, textureId, camera, mapCopy, width,height, grayLvl, farView, angleHorizontal);
+            drawTreeLOD(quadtree, Soleil, textureId, camera, mapCopy, width,height, grayLvl, farView, angleHorizontal, pgm.grayLvlRatio);
         } else {
             couleurCiel = createColor(0., 0., 0.1);
             drawTreeLinesLOD(quadtree,camera, mapCopy, width, height, grayLvl);

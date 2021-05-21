@@ -17,6 +17,12 @@ Timac createTimac(){
     return timac;
 }
 
+Pgm createPgm(){
+    Pgm pgm;
+    pgm.grayLvlRatio=0;
+    return pgm;
+}
+
 int lectureFichier(Timac *timac){
     string line[7];
     ifstream monFlux("./assets/test.timac");  //Ouverture d'un fichier en lecture

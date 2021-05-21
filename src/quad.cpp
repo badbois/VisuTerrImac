@@ -59,54 +59,43 @@ void drawTriangle(Point3D s1, Point3D s2, Point3D s3, Light Soleil, GLuint textu
     glDisable(GL_TEXTURE_2D);
 }
 
-void drawTriangles(Node noeud, Light Soleil, GLuint texture[]){
+void drawTriangles(Node noeud, Light Soleil, GLuint texture[], float grayLvlRatio){
     Point3D centre=centerOfTriangle(noeud.pointA, noeud.pointB, noeud.pointC);
-    if(centre.z>=0 && centre.z<0.2){
+    if(centre.z>=0 && centre.z<0.2*grayLvlRatio){
         drawTriangle(noeud.pointA, noeud.pointB, noeud.pointC, Soleil, texture[0]);
-    }else if(centre.z>=0.2 && centre.z<0.4){
+    }else if(centre.z>=0.2*grayLvlRatio && centre.z<0.4*grayLvlRatio){
         drawTriangle(noeud.pointA, noeud.pointB, noeud.pointC, Soleil, texture[1]);
-    }else if(centre.z>=0.4 && centre.z<0.6){
+    }else if(centre.z>=0.4*grayLvlRatio && centre.z<0.6*grayLvlRatio){
         drawTriangle(noeud.pointA, noeud.pointB, noeud.pointC, Soleil, texture[2]);
-    }else if(centre.z>=0.6 && centre.z<0.8){
+    }else if(centre.z>=0.6*grayLvlRatio && centre.z<0.8*grayLvlRatio){
         drawTriangle(noeud.pointA, noeud.pointB, noeud.pointC, Soleil, texture[3]);
-    }else if(centre.z>=0.8 && centre.z<=1){
+    }else if(centre.z>=0.8*grayLvlRatio && centre.z<=1*grayLvlRatio){
         drawTriangle(noeud.pointA, noeud.pointB, noeud.pointC, Soleil, texture[4]);
     }
 
     centre=centerOfTriangle(noeud.pointC, noeud.pointD, noeud.pointA);
-    if(centre.z>=0 && centre.z<0.2){
+    if(centre.z>=0 && centre.z<0.2*grayLvlRatio){
         drawTriangle(noeud.pointC, noeud.pointD, noeud.pointA, Soleil, texture[0]);
-    }else if(centre.z>=0.2 && centre.z<0.4){
+    }else if(centre.z>=0.2*grayLvlRatio && centre.z<0.4*grayLvlRatio){
         drawTriangle(noeud.pointC, noeud.pointD, noeud.pointA, Soleil, texture[1]);
-    }else if(centre.z>=0.4 && centre.z<0.6){
+    }else if(centre.z>=0.4*grayLvlRatio && centre.z<0.6*grayLvlRatio){
         drawTriangle(noeud.pointC, noeud.pointD, noeud.pointA, Soleil, texture[2]);
-    }else if(centre.z>=0.6 && centre.z<0.8){
+    }else if(centre.z>=0.6*grayLvlRatio && centre.z<0.8*grayLvlRatio){
         drawTriangle(noeud.pointC, noeud.pointD, noeud.pointA, Soleil, texture[3]);
-    }else if(centre.z>=0.8 && centre.z<=1){
+    }else if(centre.z>=0.8*grayLvlRatio && centre.z<=1*grayLvlRatio){
         drawTriangle(noeud.pointC, noeud.pointD, noeud.pointA, Soleil, texture[4]);
     }
     
 }
 
-void drawTree(Node* quadtree, Light soleil, GLuint texture[]) {
-    if (quadtree->isLeaf()) {
-        drawTriangles(*quadtree, soleil, texture);
-    } else {
-        drawTree(quadtree->botLeft, soleil, texture);
-        drawTree(quadtree->topLeft, soleil, texture);
-        drawTree(quadtree->botRight, soleil, texture);
-        drawTree(quadtree->topRight, soleil, texture);
-    }
-}
-
-void drawTreeLOD(Node* quadtree, Light soleil, GLuint texture[], Camera camera, float* map, int mapWidth, int mapHeight,float grayLvl, float zFar, float angleView) {
+void drawTreeLOD(Node* quadtree, Light soleil, GLuint texture[], Camera camera, float* map, int mapWidth, int mapHeight,float grayLvl, float zFar, float angleView, float grayLvlRatio) {
     if (FrustumCulling(camera, zFar, angleView, *quadtree) == 1) {
         if (quadtree->isLeaf()) {
             updateZ(quadtree, map, mapWidth, mapHeight, grayLvl);
-            drawTriangles(*quadtree, soleil, texture);
+            drawTriangles(*quadtree, soleil, texture, grayLvlRatio);
         } else if (distanceFromQuad(*quadtree, camera)>(2*mapWidth/(quadtree->depth+1))) {
             updateZ(quadtree, map, mapWidth,mapHeight,  grayLvl);
-            drawTriangles(*quadtree, soleil, texture);
+            drawTriangles(*quadtree, soleil, texture, grayLvlRatio);
 
             //Modification de la map pour éviter les cracks
             //iA, iB, iC, iD : indice des points dans la map
@@ -142,10 +131,10 @@ void drawTreeLOD(Node* quadtree, Light soleil, GLuint texture[], Camera camera, 
         } else {
             Node** tabEnfantOrdonne = (Node**) malloc(sizeof(Node*)*4);
             orderChildren(*quadtree, tabEnfantOrdonne, camera);
-            drawTreeLOD(tabEnfantOrdonne[3], soleil, texture, camera, map, mapWidth, mapHeight, grayLvl, zFar, angleView);
-            drawTreeLOD(tabEnfantOrdonne[2], soleil, texture, camera, map, mapWidth, mapHeight, grayLvl, zFar, angleView);
-            drawTreeLOD(tabEnfantOrdonne[1], soleil, texture, camera, map, mapWidth, mapHeight, grayLvl, zFar, angleView);
-            drawTreeLOD(tabEnfantOrdonne[0], soleil, texture, camera, map, mapWidth, mapHeight, grayLvl, zFar, angleView);
+            drawTreeLOD(tabEnfantOrdonne[3], soleil, texture, camera, map, mapWidth, mapHeight, grayLvl, zFar, angleView, grayLvlRatio);
+            drawTreeLOD(tabEnfantOrdonne[2], soleil, texture, camera, map, mapWidth, mapHeight, grayLvl, zFar, angleView, grayLvlRatio);
+            drawTreeLOD(tabEnfantOrdonne[1], soleil, texture, camera, map, mapWidth, mapHeight, grayLvl, zFar, angleView, grayLvlRatio);
+            drawTreeLOD(tabEnfantOrdonne[0], soleil, texture, camera, map, mapWidth, mapHeight, grayLvl, zFar, angleView, grayLvlRatio);
         }
     }
 }
