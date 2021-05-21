@@ -418,6 +418,8 @@ int main(int argc, char** argv)
         glClearDepth(1.0f); // Depth Buffer Setup
         glEnable(GL_DEPTH_TEST); // Enables Depth Testing
         glDepthFunc(GL_LEQUAL); 
+        glEnable(GL_ALPHA_TEST);
+        glAlphaFunc(GL_GREATER, 0.9);
 
         //Prise en compte de la transparence
         glEnable(GL_BLEND);
