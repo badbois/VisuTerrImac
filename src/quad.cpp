@@ -698,7 +698,8 @@ void drawBillboard(float phi, GLuint texture, Point3D scale, Light Soleil) {
             glBindTexture(GL_TEXTURE_2D, texture);
             glBegin(GL_QUADS);
 
-                ColorRGB eclairage = illuminationLambert(createPoint(0.,-0.5,1.), createPoint(0.,0.5,1.), createPoint(0.,0.5,0.), Soleil);
+                //ColorRGB eclairage = illuminationLambert(createPoint(0.,-0.5,1.), createPoint(0.,0.5,1.), createPoint(0.,0.5,0.), Soleil);
+                ColorRGB eclairage = illuminationLambert(createPoint(0.5,0.,0.), createPoint(0.,0.,0.), createPoint(0.,0.5,0.), Soleil);
                 glColor3f(eclairage.r,eclairage.g,eclairage.b);
 
                 glTexCoord2f(0.,0.);
@@ -769,19 +770,6 @@ float computeZ (float x, float y, float* map, int mapWidth, int mapHeight, float
         float d = A.x*nPlan.x+A.y*nPlan.y+A.z*nPlan.z;
         Z = (-nPlan.x*x-nPlan.y*y+d)/nPlan.z;
     }
-
-    /*
-    float Zmoyen = (A.z+B.z+C.z+D.z)/4.;
-    Zmoyen = Zmoyen/grayLvl;
-    float Zreduit = Z/grayLvl;
-
-    if (Zmoyen-Zreduit>0.1 || Zmoyen-Zreduit<-0.1 ) {
-        cout << " A " << A.z/grayLvl << " B " << B.z/grayLvl << " C " << C.z/grayLvl << " D " << D.z/grayLvl;
-    cout << " j " << j << " l " << l << endl;
-    cout << " z moyen " << Zmoyen << " z " << Zreduit << endl; 
-    }*/
-    
-
 
     return Z/grayLvl;
 }
