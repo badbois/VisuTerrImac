@@ -2,12 +2,12 @@
 #include <SDL2/SDL_image.h>
 
 //linux
-#include <GL/gl.h>
-#include <GL/glu.h>
+//#include <GL/gl.h>
+//#include <GL/glu.h>
 
 //mac
-//#include <OpenGl/gl.h>
-//#include <OpenGl/glu.h>
+#include <OpenGl/gl.h>
+#include <OpenGl/glu.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -226,7 +226,7 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     };
 
-    pgm.grayLvlRatio=  2.;
+    pgm.grayLvlRatio=  20.;
     grayLvl=grayLvl/pgm.grayLvlRatio;
     cout <<timac.nameHeightMap<<" "<<timac.Xsize <<" " << timac.Ysize <<" " << timac.Zmin <<" " << timac.Zmax <<" " << timac.Znear <<" " << timac.Zfar << endl;
     /*cout << width <<" "<< height<< " "<< grayLvl<< endl;
@@ -423,7 +423,7 @@ int main(int argc, char** argv)
         glEnable(GL_DEPTH_TEST); // Enables Depth Testing
         glDepthFunc(GL_LEQUAL); 
         glEnable(GL_ALPHA_TEST);
-        glAlphaFunc(GL_GREATER, 0.9);
+        glAlphaFunc(GL_GREATER, 0.01);
 
         //Prise en compte de la transparence
         glEnable(GL_BLEND);

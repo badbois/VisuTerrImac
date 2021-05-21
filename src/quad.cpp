@@ -1,11 +1,11 @@
 #include <SDL2/SDL.h>
 //mac
-//#include <OpenGl/gl.h>
-//#include <OpenGl/glu.h>
+#include <OpenGl/gl.h>
+#include <OpenGl/glu.h>
 
 //linux
-#include <GL/gl.h>
-#include <GL/glu.h>
+//#include <GL/gl.h>
+//#include <GL/glu.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -69,7 +69,7 @@ void drawTriangles(Node noeud, Light Soleil, GLuint texture[], float grayLvlRati
         drawTriangle(noeud.pointA, noeud.pointB, noeud.pointC, Soleil, texture[2]);
     }else if(centre.z>=0.6*grayLvlRatio && centre.z<0.8*grayLvlRatio){
         drawTriangle(noeud.pointA, noeud.pointB, noeud.pointC, Soleil, texture[3]);
-    }else if(centre.z>=0.8*grayLvlRatio && centre.z<=1*grayLvlRatio){
+    }else if(centre.z>=0.8*grayLvlRatio){
         drawTriangle(noeud.pointA, noeud.pointB, noeud.pointC, Soleil, texture[4]);
     }
 
@@ -82,7 +82,7 @@ void drawTriangles(Node noeud, Light Soleil, GLuint texture[], float grayLvlRati
         drawTriangle(noeud.pointC, noeud.pointD, noeud.pointA, Soleil, texture[2]);
     }else if(centre.z>=0.6*grayLvlRatio && centre.z<0.8*grayLvlRatio){
         drawTriangle(noeud.pointC, noeud.pointD, noeud.pointA, Soleil, texture[3]);
-    }else if(centre.z>=0.8*grayLvlRatio && centre.z<=1*grayLvlRatio){
+    }else if(centre.z>=0.8*grayLvlRatio){
         drawTriangle(noeud.pointC, noeud.pointD, noeud.pointA, Soleil, texture[4]);
     }
     
