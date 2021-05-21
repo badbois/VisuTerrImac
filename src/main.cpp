@@ -223,7 +223,7 @@ int main(int argc, char** argv)
     int *map=lecturePGM(timac.nameHeightMap, &width, &height, &grayLvl);
     if(map==NULL){
         return EXIT_FAILURE;
-    }
+    };
     cout <<timac.nameHeightMap<<" "<<timac.Xsize <<" " << timac.Ysize <<" " << timac.Zmin <<" " << timac.Zmax <<" " << timac.Znear <<" " << timac.Zfar << endl;
     /*cout << width <<" "<< height<< " "<< grayLvl<< endl;
     for(int i=1; i<=(height*width); i++){
@@ -459,14 +459,19 @@ int main(int argc, char** argv)
         */
 
         // test Billboard
-       
-       
-        glPushMatrix();
-        drawBillboard(phi, bill, createPoint(0.,3.,3.));
-        glPopMatrix();
-
+        
+        for (int i = 0; i < width/2; i++) {
+            glPushMatrix();
+            srand(i);
+            float x = (rand() % (width-1))-width/2.;
+            float y = (rand() % (height-1))-height/2.;
+            float z = computeZ(x, y, mapCopy, width, height, grayLvl)-0.1;
+            glTranslatef(x, y, z);
+            drawBillboard(phi, bill, createPoint(0.,3.,3.), Soleil);
+            glPopMatrix();
+        }
+        
         // Gestion caméra
-
         if(flagFPS==1) { // on désactive les mouvements vers le haut et bas
             flagCamUp = 0; 
             flagCamDown = 0;

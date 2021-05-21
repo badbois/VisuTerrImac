@@ -701,7 +701,7 @@ int FrustumCulling(Camera cam, float zFar, float angleView, Node node) {
 
 }
 
-void drawBillboard(float phi, GLuint texture, Point3D scale) {
+void drawBillboard(float phi, GLuint texture, Point3D scale, Light Soleil) {
             glRotatef(phi*(360/6.18),0.,0.,1.);
             glScalef(scale.x,scale.y,scale.z);
             // printf("%f \n", phi);
@@ -709,7 +709,8 @@ void drawBillboard(float phi, GLuint texture, Point3D scale) {
             glBindTexture(GL_TEXTURE_2D, texture);
             glBegin(GL_QUADS);
 
-                glColor3f(1.,1.,1.);
+                ColorRGB eclairage = illuminationLambert(createPoint(0.,-0.5,1.), createPoint(0.,0.5,1.), createPoint(0.,0.5,0.), Soleil);
+                glColor3f(eclairage.r,eclairage.g,eclairage.b);
 
                 glTexCoord2f(0.,0.);
                 glVertex3f(0.,-0.5,1.);
@@ -733,7 +734,7 @@ float clamp(float x, float bot,float top) {
 }
 
 float computeZ (float x, float y, float* map, int mapWidth, int mapHeight, float grayLvl) {
-    if (abs(x)>mapWidth/2. || abs(y)>mapHeight) {
+    if (abs(x)>mapWidth/2. || abs(y)>mapHeight/2.) {
         return 0;
     }
     
@@ -779,6 +780,19 @@ float computeZ (float x, float y, float* map, int mapWidth, int mapHeight, float
         float d = A.x*nPlan.x+A.y*nPlan.y+A.z*nPlan.z;
         Z = (-nPlan.x*x-nPlan.y*y+d)/nPlan.z;
     }
+
+    /*
+    float Zmoyen = (A.z+B.z+C.z+D.z)/4.;
+    Zmoyen = Zmoyen/grayLvl;
+    float Zreduit = Z/grayLvl;
+
+    if (Zmoyen-Zreduit>0.1 || Zmoyen-Zreduit<-0.1 ) {
+        cout << " A " << A.z/grayLvl << " B " << B.z/grayLvl << " C " << C.z/grayLvl << " D " << D.z/grayLvl;
+    cout << " j " << j << " l " << l << endl;
+    cout << " z moyen " << Zmoyen << " z " << Zreduit << endl; 
+    }*/
     
+
+
     return Z/grayLvl;
 }
