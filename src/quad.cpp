@@ -300,24 +300,24 @@ Camera moveCamera (Camera camera, int flagCamUp, int flagCamDown, int flagCamLef
 
     Vector3D Left = produitVectoriel(dirCiel, dirRegard);
     Left = normalize(Left);
-    Vector3D pasLeft = multVector(Left, (0.02*flagCamLeft));
+    Vector3D pasLeft = multVector(Left, (0.05*flagCamLeft));
     camera.posCam = addVectors(camera.posCam, pasLeft);
     //camera.viseCam = addVectors(camera.viseCam, pasLeft); 
 
     Vector3D up = produitVectoriel(dirRegard, Left);
     camera.up = up;
 
-    Vector3D pasRight = multVector(Left, (-0.02*flagCamRight));
+    Vector3D pasRight = multVector(Left, (-0.05*flagCamRight));
     camera.posCam = addVectors(camera.posCam, pasRight);
     //camera.viseCam = addVectors(camera.viseCam, pasRight); 
 
     Vector3D Forward = produitVectoriel(Left, dirCiel);
     Forward = normalize(Forward);
-    Vector3D pasForward = multVector(Forward, (0.02*flagCamForward));
+    Vector3D pasForward = multVector(Forward, (0.05*flagCamForward));
     camera.posCam = addVectors(camera.posCam, pasForward);
     //camera.viseCam = addVectors(camera.viseCam, pasForward);
 
-    Vector3D pasBackward = multVector(Forward, (-0.02*flagCamBackward));
+    Vector3D pasBackward = multVector(Forward, (-0.05*flagCamBackward));
     camera.posCam = addVectors(camera.posCam, pasBackward);
     //camera.viseCam = addVectors(camera.viseCam, pasBackward);
 
