@@ -136,8 +136,8 @@ void drawCenteredBox(float length, ColorRGB couleurCiel, GLuint* textureSky)
     glEnable(GL_TEXTURE_2D);
     
     float l = length/2;
-    glColor3f(1., 1., 1.);
-    //glColor3f(couleurCiel.r, couleurCiel.g, couleurCiel.b);
+    //glColor3f(1., 1., 1.);
+    glColor3f(couleurCiel.r, couleurCiel.g, couleurCiel.b);
     glBindTexture(GL_TEXTURE_2D, textureSky[1]);
     glBegin(GL_QUADS);
     glTexCoord2f(0.,1.);
@@ -360,8 +360,8 @@ int main(int argc, char** argv)
    
     glGenTextures(1, &bill);
     glBindTexture(GL_TEXTURE_2D, bill);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, imageBill->w,imageBill->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageBill->pixels);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, imageBill->w,imageBill->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageBill->pixels);
     glBindTexture(GL_TEXTURE_2D,0);
 
     // Definition du noeud a dessiner
@@ -419,7 +419,7 @@ int main(int argc, char** argv)
         glEnable(GL_DEPTH_TEST); // Enables Depth Testing
         glDepthFunc(GL_LEQUAL); 
         glEnable(GL_ALPHA_TEST);
-        glAlphaFunc(GL_GREATER, 0.9);
+        glAlphaFunc(GL_NOTEQUAL, 0);
 
         //Prise en compte de la transparence
         glEnable(GL_BLEND);
@@ -436,7 +436,7 @@ int main(int argc, char** argv)
             mapCopy[i] = (float) map[i];
         }
         if (switchWireframe == 0) {
-            couleurCiel = createColor(0.5, 0.5, 0.9);
+            couleurCiel = illuminationLambert(createPoint(0.5,0.,0.), createPoint(0.,0.,0.), createPoint(0.,0.5,0.), Soleil);
             //drawTree(quadtree, Soleil, grass);
             drawTreeLOD(quadtree, Soleil, textureId, camera, mapCopy, width,height, grayLvl, farView, angleHorizontal);
         } else {
@@ -461,17 +461,19 @@ int main(int argc, char** argv)
         */
 
         // test Billboard
-        
-        for (int i = 0; i < width/2; i++) {
-            glPushMatrix();
-            srand(i);
-            float x = (rand() % (width-1))-width/2.;
-            float y = (rand() % (height-1))-height/2.;
-            float z = computeZ(x, y, mapCopy, width, height, grayLvl)-0.1;
-            glTranslatef(x, y, z);
-            drawBillboard(phi, bill, createPoint(0.,3.,3.), Soleil);
-            glPopMatrix();
+        if (switchWireframe == 0) {
+                for (int i = 0; i < width/2; i++) {
+                glPushMatrix();
+                srand(i);
+                float x = (rand() % (width-1))-width/2.;
+                float y = (rand() % (height-1))-height/2.;
+                float z = computeZ(x, y, mapCopy, width, height, grayLvl)-0.1;
+                glTranslatef(x, y, z);
+                drawBillboard(phi, bill, createPoint(0.,3.,3.), Soleil);
+                glPopMatrix();
+            }
         }
+        
         
         // Gestion caméra
         if(flagFPS==1) { // on désactive les mouvements vers le haut et bas
