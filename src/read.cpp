@@ -10,10 +10,11 @@ Timac createTimac(){
     timac.nameHeightMap="";
     timac.Xsize=0;
     timac.Ysize=0;
-    timac.Zfar=0;
-    timac.Zmax=0;
     timac.Zmin=0;
+    timac.Zmax=0;
+    timac.Zfar=0;
     timac.Znear=0;
+    timac.fov=0;
     return timac;
 }
 
@@ -24,24 +25,25 @@ Pgm createPgm(){
 }
 
 int lectureFichier(Timac *timac){
-    string line[7];
+    string line[8];
     ifstream monFlux("./assets/test.timac");  //Ouverture d'un fichier en lecture
 
     if(monFlux) //Si l'ouverture du fichier a reussi on lit chaque ligne
     {
-        for(int i=0; i<7; i++){
+        for(int i=0; i<8; i++){
             if(!getline(monFlux, line[i])){
                 cout << "ERREUR: fichier incomplet." << endl;
                 return 0;
             }
         }
         timac->nameHeightMap=line[0].c_str(); //On place chaque ligne dans une variable
-        timac->Xsize=atoi(line[1].c_str());
-        timac->Ysize=atoi(line[2].c_str());
-        timac->Zmin=atoi(line[3].c_str());
-        timac->Zmax=atoi(line[4].c_str());
-        timac->Znear=atoi(line[5].c_str());
-        timac->Zfar=atoi(line[6].c_str());
+        timac->Xsize=atof(line[1].c_str());
+        timac->Ysize=atof(line[2].c_str());
+        timac->Zmin=atof(line[3].c_str());
+        timac->Zmax=atof(line[4].c_str());
+        timac->Znear=atof(line[5].c_str());
+        timac->Zfar=atof(line[6].c_str());
+        timac->fov=atof(line[7].c_str());
         return 1;
     }
     else

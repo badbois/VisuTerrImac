@@ -7,12 +7,12 @@
 #include "quadtree.h"
 
 //linux
-#include <GL/gl.h>
-#include <GL/glu.h>
+// #include <GL/gl.h>
+// #include <GL/glu.h>
 
 //mac
-//#include <OpenGl/gl.h>
-//#include <OpenGl/glu.h>
+#include <OpenGl/gl.h>
+#include <OpenGl/glu.h>
 
 
 
@@ -42,13 +42,13 @@ void drawTriangle(Point3D s1, Point3D s2, Point3D s3, Light Soleil, GLuint textu
 void drawTriangles(Node noeud, Light Soleil, GLuint texture[], float grayLvlRatio);
 void drawTree(Node* quadtree, Light soleil, GLuint texture[]);
 
-void drawTreeLOD(Node* quadtree, Light soleil, GLuint texture[], Camera camera, float* map, int mapWidth, int mapHeight, float grayLvl, float zFar, float angleView, float grayLvlRatio);
+void drawTreeLOD(Node* quadtree, Light soleil, GLuint texture[], Camera camera, float* map, int mapWidth, int mapHeight, float grayLvl, float zFar, float angleView, float grayLvlRatio, Timac *timac);
 void updateZ (Node* quadtree, float*map, int mapWidth, int mapHeight,float grayLvl);
 
 void drawTriangleLines(Point3D s1, Point3D s2, Point3D s3, float thickness);
 void drawTrianglesLines(Node noeud, float thickness);
 void drawTreeLines(Node* quadtree);
-void drawTreeLinesLOD(Node* quadtree, Camera camera, float* map, int mapWidth,  int mapHeight,float grayLvl);
+void drawTreeLinesLOD(Node* quadtree, Camera camera, float* map, int mapWidth, int mapHeight, float grayLvl, Timac *timac);
 
 // Pour calculer la normale (pour l'illumination), on a besoin du produit vectoriel
 // Attention le produit vectoriel donne une base directe, y penser quand on donne les vecteurs AB et AC
@@ -82,6 +82,6 @@ int FrustumCulling(Camera cam, float zFar, float angleView, Node node);
 
 void drawBillboard(float phi, GLuint texture, Point3D scale, Light Soleil);
 float clamp(float x, float bot,float top);
-float computeZ (float x, float y, float* map, int mapWidth, int mapHeight,float grayLvl);
+float computeZ (float x, float y, float* map, int mapWidth, int mapHeight,float grayLvl, Timac *timac);
 
 #endif /*QUAD_H*/

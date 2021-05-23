@@ -7,12 +7,13 @@ using namespace std;
 
 typedef struct {
     std::string nameHeightMap;
-    int Xsize;
-    int Ysize;
-    int Zmin;
-    int Zmax;
-    int Znear;
-    int Zfar;
+    float Xsize;
+    float Ysize;
+    float Zmin;
+    float Zmax;
+    float Znear;
+    float Zfar;
+    float fov;
 } Timac;
 
 typedef struct {

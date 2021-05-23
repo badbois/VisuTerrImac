@@ -1,13 +1,14 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <random>
 
 //linux
-#include <GL/gl.h>
-#include <GL/glu.h>
+// #include <GL/gl.h>
+// #include <GL/glu.h>
 
 //mac
-//#include <OpenGl/gl.h>
-//#include <OpenGl/glu.h>
+#include <OpenGl/gl.h>
+#include <OpenGl/glu.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -16,6 +17,7 @@
 
 #include "../include/quad.h"
 #include "../include/quadtree.h"
+#include "../include/shading.h"
 
 /* Dimensions initiales et titre de la fenetre */
 static const unsigned int WINDOW_WIDTH = 800;
@@ -38,7 +40,7 @@ static int flagCamPanLeft = 0;
 static int flagCamPanRight = 0;
 static int flagCamTiltUp = 0;
 static int flagCamTiltDown = 0;
-static int flagFPS = 0;
+static int flagFPS = 1;
 
 // phi 3. pour etre aligné sur axe 
 static float phi = 3.;
@@ -52,14 +54,13 @@ ColorRGB couleurCiel = createColor(0.5, 0.5, 0.9);
 int switchWireframe = 0;
 
 //gluPerspective et frustum culling
-float angleView = 50.0;
+
 float angleHorizontal = 50.0; 
-float farView = 100.0;
 
 /* Nombre minimal de millisecondes separant le rendu de deux images */
 static const Uint32 FRAMERATE_MILLISECONDS = 1000 / 60;
 
-void onWindowResized(unsigned int width, unsigned int height, Camera camera)
+void onWindowResized(unsigned int width, unsigned int height, Camera camera, Timac *timac)
 { 
     float aspectRatio = width / (float) height;
     currentHeight = height;
@@ -69,7 +70,7 @@ void onWindowResized(unsigned int width, unsigned int height, Camera camera)
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity(); 
     
-    float angleViewRad = (angleView/180)*M_PI;
+    float angleViewRad = (timac->fov/180)*M_PI;
     angleHorizontal = 2.0 * atan(tan(angleViewRad * 0.5) * aspectRatio); 
     angleHorizontal = (angleHorizontal/M_PI)*180;
 
@@ -87,7 +88,7 @@ void onWindowResized(unsigned int width, unsigned int height, Camera camera)
         -GL_VIEW_SIZE / 2. / aspectRatio, GL_VIEW_SIZE / 2. / aspectRatio);
     }
     */
-   gluPerspective(angleView, aspectRatio, 0.1, farView);
+   gluPerspective(timac->fov, aspectRatio, timac->Znear, timac->Zfar);
    orienteCamera(camera);
 }
 
@@ -138,7 +139,7 @@ void drawCenteredBox(float length, ColorRGB couleurCiel, GLuint* textureSky)
     float l = length/2;
     //glColor3f(1., 1., 1.);
     glColor3f(couleurCiel.r, couleurCiel.g, couleurCiel.b);
-    glBindTexture(GL_TEXTURE_2D, textureSky[1]);
+    glBindTexture(GL_TEXTURE_2D, textureSky[5]);
     glBegin(GL_QUADS);
     glTexCoord2f(0.,1.);
     glVertex3f(-l , l, -l);
@@ -177,7 +178,7 @@ void drawCenteredBox(float length, ColorRGB couleurCiel, GLuint* textureSky)
     glVertex3f(-l , -l, -l);
     glEnd();
 
-    glBindTexture(GL_TEXTURE_2D, textureSky[1]);
+    glBindTexture(GL_TEXTURE_2D, textureSky[5]);
     glBegin(GL_QUADS);
     glTexCoord2f(0.,0.);
     glVertex3f(-l , -l, -l);
@@ -189,7 +190,7 @@ void drawCenteredBox(float length, ColorRGB couleurCiel, GLuint* textureSky)
     glVertex3f(l , -l, -l);
     glEnd();
 
-    glBindTexture(GL_TEXTURE_2D, textureSky[1]);
+    glBindTexture(GL_TEXTURE_2D, textureSky[5]);
     glBegin(GL_QUADS);
     glTexCoord2f(0.,0.);
     glVertex3f(-l , -l, l);
@@ -226,28 +227,17 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     };
 
-    pgm.grayLvlRatio=  20.;
-    grayLvl=grayLvl/pgm.grayLvlRatio;
+    pgm.grayLvlRatio=  timac.Zmax-timac.Zmin;
+    // grayLvl=grayLvl/pgm.grayLvlRatio;
     cout <<timac.nameHeightMap<<" "<<timac.Xsize <<" " << timac.Ysize <<" " << timac.Zmin <<" " << timac.Zmax <<" " << timac.Znear <<" " << timac.Zfar << endl;
-    /*cout << width <<" "<< height<< " "<< grayLvl<< endl;
-    for(int i=1; i<=(height*width); i++){
-        if(i%width!=0 ){
-            cout << map[i-1]<< " ";
-        }else{
-            cout << map[i-1]<< endl;
-        }
-    }*/
 
     Point3D trucA = createPoint(0.,0.,0.);
     Point3D trucB = createPoint(0., (float)(width-1), 0.);
     Point3D trucC = createPoint((float)(height-1), (float)(width-1), 0.);
     Point3D trucD = createPoint((float)(height-1),0.,0.);
 
-    Node* quadtree = createTree(trucA,trucB,trucC,trucD,map,width, height, 0, (float)grayLvl);
-    printPoint3D(quadtree->pointA);
-    printPoint3D(quadtree->pointB);
-    printPoint3D(quadtree->pointC);
-    printPoint3D(quadtree->pointD);
+    Node* quadtree = Node::createTree(trucA,trucB,trucC,trucD,map,width, height, 0, (float)grayLvl, &timac);
+
 
     //* Initialisation de la SDL */
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE,32); 
@@ -317,51 +307,20 @@ int main(int argc, char** argv)
 
     // glu
   
-    onWindowResized(WINDOW_WIDTH, WINDOW_HEIGHT, camera);
+    onWindowResized(WINDOW_WIDTH, WINDOW_HEIGHT, camera, &timac);
 
     // Texture
 
-    char* name[]={"assets/grass_5.jpg","assets/grass_4.jpg", "assets/grass_3.jpg", "assets/grass_2.jpg","assets/grass_1.jpg"};
-    GLuint textureId[5];
-
-    for(int i=0; i<5; i++){
-        SDL_Surface* image=IMG_Load(name[i]);
-        if(!image){
-        }
-        glGenTextures(1, &textureId[i]);
-        glBindTexture(GL_TEXTURE_2D, textureId[i]);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image->w, image->h, 0, GL_RGB, GL_UNSIGNED_BYTE, image->pixels);
-        glBindTexture(GL_TEXTURE_2D, 0);        
+    GLuint tabTextureId[6];
+    char* name[6]={"assets/grass_5.jpg","assets/grass_4.jpg", "assets/grass_3.jpg", "assets/grass_2.jpg","assets/grass_1.jpg", 
+                    "assets/skybox_top.jpg"};
+    for(int i = 0; i<6; i++){
+        tabTextureId[i] = generateTexture(name[i]);
     }
 
-    //Ciel
-    
-    char* nameSky[]={"assets/skybox.jpg","assets/skybox_top.jpg", "assets/skybox_bot.jpg"};
-    GLuint textureSky[3];
-    for(int i=0; i<3; i++){
-        SDL_Surface* imageSky=IMG_Load(nameSky[i]);
-        if(!imageSky){
-        }
-        glGenTextures(1, &textureSky[i]);
-        glBindTexture(GL_TEXTURE_2D, textureSky[i]);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imageSky->w, imageSky->h, 0, GL_RGB, GL_UNSIGNED_BYTE, imageSky->pixels);
-        glBindTexture(GL_TEXTURE_2D, 0);        
-    }
-
-
-    // Image billboard
-
-    GLuint bill;
-
+    //Billboard
     SDL_Surface* imageBill = IMG_Load("./assets/tree.png");
-    if (!imageBill) {
-        printf("erreur \n");
-    } else {
-        printf("ok \n");
-    } 
-   
+    GLuint bill;
     glGenTextures(1, &bill);
     glBindTexture(GL_TEXTURE_2D, bill);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -412,7 +371,7 @@ int main(int argc, char** argv)
         glPushMatrix();
         glDepthMask(GL_FALSE);
         glTranslatef(camera.posCam.x, camera.posCam.y, camera.posCam.z);
-        drawCenteredBox(5., couleurCiel, textureSky);
+        drawCenteredBox(5., couleurCiel, tabTextureId);
         //glRotatef(180, 0.,0.,1.);
         //drawCenteredBox(1., couleurCiel);
         glDepthMask(GL_TRUE);
@@ -442,10 +401,10 @@ int main(int argc, char** argv)
         if (switchWireframe == 0) {
             couleurCiel = illuminationLambert(createPoint(0.5,0.,0.), createPoint(0.,0.,0.), createPoint(0.,0.5,0.), Soleil);
             //drawTree(quadtree, Soleil, grass);
-            drawTreeLOD(quadtree, Soleil, textureId, camera, mapCopy, width,height, grayLvl, farView, angleHorizontal, pgm.grayLvlRatio);
+            drawTreeLOD(quadtree, Soleil, tabTextureId, camera, mapCopy, width,height, grayLvl, timac.Zfar, angleHorizontal, pgm.grayLvlRatio, &timac);
         } else {
             couleurCiel = createColor(0., 0., 0.1);
-            drawTreeLinesLOD(quadtree,camera, mapCopy, width, height, grayLvl);
+            drawTreeLinesLOD(quadtree,camera, mapCopy, width, height, grayLvl, &timac);
         }
         glPopMatrix();
         
@@ -465,15 +424,21 @@ int main(int argc, char** argv)
         */
 
         // test Billboard
+        std::default_random_engine generator;
+        std::uniform_real_distribution<float> distribution(-(timac.Xsize)/2,(timac.Xsize)/2);
+
         if (switchWireframe == 0) {
-                for (int i = 0; i < width/2; i++) {
+                for (int i = 0; i <(timac.Xsize)/2.; i++) {
                 glPushMatrix();
-                srand(i);
-                float x = (rand() % (width-1))-width/2.;
-                float y = (rand() % (height-1))-height/2.;
-                float z = computeZ(x, y, mapCopy, width, height, grayLvl)-0.1;
+                srand(4*i);
+                //float x = (rand() % ((int)(timac.Xsize)-1))-((timac.Xsize)/2.);
+                //float y = (rand() % ((int)(timac.Ysize)-1))-((timac.Ysize)/2.);
+                float x=distribution(generator);
+                std::uniform_real_distribution<float> distribution(-(timac.Ysize)/2,(timac.Ysize)/2);
+                float y= distribution(generator);
+                float z = computeZ(x, y, mapCopy, width, height, grayLvl, &timac)-0.1;
                 glTranslatef(x, y, z);
-                drawBillboard(phi, bill, createPoint(0.,3.,3.), Soleil);
+                drawBillboard(phi, bill , createPoint(0.,3.,3.), Soleil);
                 glPopMatrix();
             }
         }
@@ -488,9 +453,9 @@ int main(int argc, char** argv)
                             flagCamForward, flagCamBackward, flagCamTiltDown, flagCamTiltUp,
                             flagCamPanLeft, flagCamPanRight, &teta, &phi);
         if(flagFPS==1) {
-            camera.posCam.z = computeZ(camera.posCam.x, camera.posCam.y, mapCopy, width, height, grayLvl)+1.;
+            camera.posCam.z = computeZ(camera.posCam.x, camera.posCam.y, mapCopy, width, height, grayLvl, &timac)+1.;
         }
-        onWindowResized(currentWidth, currentHeight, camera);
+        onWindowResized(currentWidth, currentHeight, camera, &timac);
 
         
         /* Echange du front et du back buffer : mise a jour de la fenetre */
@@ -521,7 +486,7 @@ int main(int argc, char** argv)
                     {
                         /* Redimensionnement fenetre */
                         case SDL_WINDOWEVENT_RESIZED:
-                            onWindowResized(e.window.data1, e.window.data2, camera);                
+                            onWindowResized(e.window.data1, e.window.data2, camera, &timac);                
                             break;
 
                         default:
@@ -637,10 +602,9 @@ int main(int argc, char** argv)
     /* Liberation des ressources associees a la SDL */ 
 
     for(int i=0; i<5; i++){
-        glDeleteTextures(1, &textureId[i]);
+        glDeleteTextures(1, &tabTextureId[i]);
     }
-    glDeleteTextures(1, &bill);
-    SDL_FreeSurface(imageBill);
+
 
     SDL_GL_DeleteContext(context);
     SDL_DestroyWindow(window);

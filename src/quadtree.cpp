@@ -4,7 +4,69 @@
 #include <iostream>
 #include <math.h>
 
-void Node::initNode(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD, int depth) {
+float transfoXGeometryToIndice(float x, int mapWidth, int mapHeight, Timac *timac) {
+    float ix= ((x + timac->Xsize/2.)/timac->Xsize) * (float)(mapWidth-1);
+    return ix;
+}
+
+float transfoYGeometryToIndice(float y, int mapWidth, int mapHeight, Timac *timac) {
+    float iy= ((y + timac->Ysize/2.)/timac->Ysize) * (float)(mapHeight-1);
+    return iy;
+}
+
+float transfoZIndiceToGeometry(float z, int mapWidth, int mapHeight, Timac *timac, int grayLvl) {
+    float gz=timac->Zmin + (z/grayLvl)*(timac->Zmax - timac->Zmin);
+    return gz;
+}
+
+Point3D transfoIndiceToGeometry(Point3D point, int mapWidth, int mapHeight, Timac *timac) {
+    point.x=((point.x/(float)(mapWidth-1))* timac->Xsize)-(timac->Xsize)/2.;
+    point.y=((point.y/(float)(mapHeight-1))* timac->Ysize)-(timac->Ysize)/2.;
+    point.z=timac->Zmin + (point.z)*(timac->Zmax - timac->Zmin);
+    return point; //multVector(addVectors(point,createPoint(-100/2, -100/2, 0)), 2.);
+}
+
+Point3D Node::getPointA() {
+    return transfoIndiceToGeometry(pointA, mapWidth, mapHeight, timac);
+}
+Point3D Node::getPointB() {
+    return transfoIndiceToGeometry(pointB, mapWidth, mapHeight, timac);
+}
+Point3D Node::getPointC() {
+    return transfoIndiceToGeometry(pointC, mapWidth, mapHeight, timac);
+}
+Point3D Node::getPointD() {
+    return transfoIndiceToGeometry(pointD, mapWidth, mapHeight, timac);
+}
+
+Point3D Node::getPointAEnPixels() {
+    return pointA;
+}
+Point3D Node::getPointBEnPixels() {
+    return pointB;
+}
+Point3D Node::getPointCEnPixels() {
+    return pointC;
+}
+
+Point3D Node::getPointDEnPixels() {
+    return pointD;
+}
+
+void Node::setPointAz(float z) {
+    pointA.z = z;
+}
+void Node::setPointBz(float z) {
+    pointB.z = z;
+}
+void Node::setPointCz(float z) {
+    pointC.z = z;
+}
+void Node::setPointDz(float z) {
+    pointD.z = z;
+}
+
+void Node::initNode(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD, int depth, int mapHeight, int mapWidth, Timac *timac) {
     this->pointA = pointA;
     this->pointB = pointB;
     this->pointC = pointC;
@@ -14,6 +76,9 @@ void Node::initNode(Point3D pointA, Point3D pointB, Point3D pointC, Point3D poin
     this->topRight = nullptr;
     this->botLeft = nullptr;
     this->botRight = nullptr;
+    this->mapHeight = mapHeight;
+    this->mapWidth = mapWidth;
+    this->timac=timac;
 };
 
 Node* Node::get_topLeft_child() {
@@ -63,9 +128,9 @@ void Node::allLeaves(Node* leaves[], int* nbLeaves){
      }
 };
 
-Node* createNode(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD, int depth) {
+Node* createNode(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD, int depth, int mapHeight, int mapWidth, Timac *timac) {
     Node* newNode = new Node;
-    newNode->initNode(pointA, pointB, pointC, pointD, depth);
+    newNode->initNode(pointA, pointB, pointC, pointD, depth, mapHeight, mapWidth, timac);
     return newNode;
 }
 
@@ -207,8 +272,10 @@ void ajustePointsEnfants (float x1, float x2, float* X, float* correction) {
 
 // Version où on arrondit au dessus
 
-Node* createTree(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD, int *map, int mapWidth, int mapHeight,int depth, float grayLvl){ //PAS FINI
+Node* Node::createTree(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD, int *map, int mapWidth, int mapHeight,int depth, float grayLvl, Timac *timac){ //PAS FINI
     
+
+
     //recuperation des coord Z des points
     getZ(&pointA, map, mapWidth, grayLvl);
     getZ(&pointB, map, mapWidth, grayLvl);
@@ -216,7 +283,7 @@ Node* createTree(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD,
     getZ(&pointD, map, mapWidth, grayLvl);
 
     //creation du noeux
-    Node *newNode=createNode(pointA, pointB, pointC, pointD, depth);
+    Node *newNode=createNode(pointA, pointB, pointC, pointD, depth, mapHeight, mapWidth, timac);
     
     // Calculs des coordonnées des points enfants : milieu AB et BC
     // Arrondi au dessus (égal si nombre entier)
@@ -234,21 +301,21 @@ Node* createTree(Point3D pointA, Point3D pointB, Point3D pointC, Point3D pointD,
         Point3D pointCentre=createPoint(BCx, ABy, 0);
 
         //Creation des 4 enfants 
-        newNode->topLeft = createTree(pointA, pointAB, pointCentre, pointDA, map, mapWidth, mapHeight, depth+1, grayLvl);
-        newNode->topRight = createTree(pointAB, pointB, pointBC, pointCentre, map, mapWidth, mapHeight, depth+1, grayLvl);
-        newNode->botRight = createTree(pointCentre, pointBC, pointC, pointCD, map, mapWidth, mapHeight, depth+1, grayLvl);
-        newNode->botLeft = createTree(pointDA, pointCentre, pointCD, pointD, map, mapWidth, mapHeight, depth+1, grayLvl);
+        newNode->topLeft = createTree(pointA, pointAB, pointCentre, pointDA, map, mapWidth, mapHeight, depth+1, grayLvl, timac);
+        newNode->topRight = createTree(pointAB, pointB, pointBC, pointCentre, map, mapWidth, mapHeight, depth+1, grayLvl, timac);
+        newNode->botRight = createTree(pointCentre, pointBC, pointC, pointCD, map, mapWidth, mapHeight, depth+1, grayLvl, timac);
+        newNode->botLeft = createTree(pointDA, pointCentre, pointCD, pointD, map, mapWidth, mapHeight, depth+1, grayLvl, timac);
     }
 
-    newNode->pointA.x = pointA.x-mapWidth/2.;
-    newNode->pointB.x = pointB.x-mapWidth/2.;
-    newNode->pointC.x = pointC.x-mapWidth/2.;
-    newNode->pointD.x = pointD.x-mapWidth/2.;
+    newNode->pointA.x = pointA.x;
+    newNode->pointB.x = pointB.x;
+    newNode->pointC.x = pointC.x;
+    newNode->pointD.x = pointD.x;
     
-    newNode->pointA.y = pointA.y-mapHeight/2.;
-    newNode->pointB.y = pointB.y-mapHeight/2.;
-    newNode->pointC.y = pointC.y-mapHeight/2.;
-    newNode->pointD.y = pointD.y-mapHeight/2.;
+    newNode->pointA.y = pointA.y;
+    newNode->pointB.y = pointB.y;
+    newNode->pointC.y = pointC.y;
+    newNode->pointD.y = pointD.y;
 
     return newNode;
 }
