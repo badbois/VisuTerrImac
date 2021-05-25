@@ -7,12 +7,12 @@
 #include "colors.h"
 
 //linux
-// #include <GL/gl.h>
-// #include <GL/glu.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
 
 //mac
-#include <OpenGl/gl.h>
-#include <OpenGl/glu.h>
+//#include <OpenGl/gl.h>
+//#include <OpenGl/glu.h>
 
 // prend les coordonne du quadtree et appelle les fonction de dessin en appliquant le LOD
 void drawQuadTreeLOD(Node* quadtree, Light soleil, GLuint texture[], Camera camera, float* map, int mapWidth, int mapHeight, float grayLvl, float zFar, float angleView, float grayLvlRatio, Timac *timac);
@@ -35,7 +35,8 @@ void drawTrianglesLines(Node noeud, float thickness);
 //Dessine un Billboard 
 void drawBillboard(float phi, GLuint texture, Point3D scale, Light Soleil);
 
-//DRAW_MENU
+//Dessine le menu 
+void drawMenu(GLuint texture, Camera camera, float phi, float teta);
 
 //Dessine l'origine
 void drawOrigin();

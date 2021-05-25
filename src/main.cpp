@@ -3,12 +3,12 @@
 #include <random>
 
 //linux
-// #include <GL/gl.h> 
-// #include <GL/glu.h>
+#include <GL/gl.h> 
+#include <GL/glu.h>
 
 //mac
-#include <OpenGl/gl.h>
-#include <OpenGl/glu.h>
+//#include <OpenGl/gl.h>
+//#include <OpenGl/glu.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -42,10 +42,11 @@ static int flagCamPanRight = 0;
 static int flagCamTiltUp = 0;
 static int flagCamTiltDown = 0;
 static int flagFPS = 1;
+static int validateMenu = 0;
 
 // phi 3. pour etre aligné sur axe 
-static float phi = 3.;
-static float teta = -0.1; 
+static float phi = 0.;
+static float teta = 0.; 
 
 /*Soleil*/
 int switchSun = 0;
@@ -170,7 +171,7 @@ int main(int argc, char** argv)
     //Camera
 
     Camera camera;
-    camera.posCam = createPoint(5.,7.,1.);
+    camera.posCam = createPoint(10.,7.,1.);
     camera.viseCam = createPoint(0.,0.,0.);
     camera.up = createPoint(0.,0.,1.);
 
@@ -186,6 +187,11 @@ int main(int argc, char** argv)
     for(int i = 0; i<6; i++){
         tabTextureId[i] = generateTexture(name[i]);
     }
+
+    // Texture menu
+
+    char* textureMenu = {"assets/menu.jpg"};
+    GLuint menuTexture = generateTexture(textureMenu);
 
     //Billboard
     SDL_Surface* imageBill = IMG_Load("./assets/tree.png");
@@ -286,6 +292,12 @@ int main(int argc, char** argv)
                 drawBillboard(phi, bill , createPoint(0.,3.,3.), Soleil);
                 glPopMatrix();
             }
+        }
+
+          // Activation et désactivation du menu
+
+        if(validateMenu == 1){
+        drawMenu(menuTexture, camera, phi, teta);
         }
         
         
@@ -395,6 +407,14 @@ int main(int argc, char** argv)
                     }
                     if (e.key.keysym.sym == 99) { // c camera (mode FPS)
                         flagFPS = 1-flagFPS;
+                    }
+                    if(e.key.keysym.sym == SDLK_RETURN || e.key.keysym.sym == SDLK_KP_ENTER) {  // appuyer sur entrer 
+                        if(validateMenu == 1){
+                            validateMenu = 0;
+                        }
+                        else{
+                            validateMenu = 1;
+                        }
                     }
                     break;
                 case SDL_KEYUP:

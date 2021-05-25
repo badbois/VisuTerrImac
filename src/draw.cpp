@@ -216,6 +216,39 @@ void drawBillboard(float phi, GLuint texture, Point3D scale, Light Soleil) {
 }
 
 //DRAW_MENU
+void drawMenu(GLuint texture, Camera camera, float phi, float teta){
+    
+    glPushMatrix();
+        glTranslatef(camera.posCam.x, camera.posCam.y, camera.posCam.z);
+        Vector3D dirRegard = createVectorFromPoints(camera.posCam, camera.viseCam);
+        dirRegard = normalize(dirRegard);
+        dirRegard = multVector(dirRegard, 0.9);
+        glTranslatef(dirRegard.x, dirRegard.y, dirRegard.z);
+        glRotatef(phi*(360/6.18),0.,0.,1.);
+        glRotatef(-teta*(360/6.18), 0., 1., 0.);
+
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glBegin(GL_QUADS);     
+
+        glTexCoord2f(0.,0.);
+        glVertex3f(0.,1.,0.6);        
+
+        glTexCoord2f(1.,0.);
+        glVertex3f(0.,-1.,0.6);
+        
+        glTexCoord2f(1.,1.);
+        glVertex3f(0.,-1.,-0.6);
+
+        glTexCoord2f(0.,1.);
+        glVertex3f(0.,1.,-0.6);
+        
+    glEnd();
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glDisable(GL_TEXTURE_2D);
+
+    glPopMatrix();
+}
 
 //Dessine l'origine
 void drawOrigin() 
