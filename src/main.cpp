@@ -81,8 +81,8 @@ int main(int argc, char** argv)
     std::string nameHeightMap;
     int tmp, width, height, grayLvl;
     Timac timac=createTimac();
-    
-    tmp=lectureFichier(&timac);
+    string nomFichier= "fichier.timac";
+    tmp=lectureFichier(&timac, nomFichier);
     if (!tmp){
         cerr << "impossible de lire le fichier .timac" << endl;
         return EXIT_FAILURE;
