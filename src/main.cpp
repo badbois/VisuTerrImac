@@ -87,7 +87,7 @@ int main(int argc, char** argv)
         cerr << "impossible de lire le fichier .timac" << endl;
         return EXIT_FAILURE;
     }
-
+    
     int *map=lecturePGM(timac.nameHeightMap, &width, &height, &grayLvl);
     if(map==NULL){
         cerr << "impossible de lire le fichier .pgm" << endl;
@@ -126,7 +126,8 @@ int main(int argc, char** argv)
     //Camera
     Flags cameraFlags= createFlags();
     Camera camera;
-    camera.posCam = createPoint(1.,1., 0.); // pk pas 0 ???
+    camera.posCam = createPoint(1.,1., 0.);// pk pas 0 ???
+    camera.posCam = createPoint(1., 1., 0.); 
     camera.viseCam = createPoint(0.,0.,0.);
     camera.up = createPoint(0.,0.,1.);
 
@@ -145,6 +146,8 @@ int main(int argc, char** argv)
 
         // Soit on dessine le menu, soit toute la map
         if(validateMenu == 1){
+            // On dessine devant tous les arbres etc...
+            glDisable(GL_DEPTH_TEST); // Enables Depth Testing
             drawMenu(tabTextureId[6], camera, phi, teta);
         }else{  
             // Gestion Soleil
@@ -155,7 +158,7 @@ int main(int argc, char** argv)
             ColorRGB couleurSoleil = createColor(2.,2.,2.);
             Light Soleil = createSun(rayonSoleil, couleurSoleil);
 
-            // A QUOI CA SERT?
+            // condition initiales de la boucle
             glClear(GL_COLOR_BUFFER_BIT);
             glClear(GL_DEPTH_BUFFER_BIT);
             glMatrixMode(GL_MODELVIEW);
@@ -169,13 +172,13 @@ int main(int argc, char** argv)
             glPopMatrix();
 
             //Prise en compte de la profondeur
-            glClearDepth(1.0f); // Depth Buffer Setup
+            glClearDepth(1.f); // Depth Buffer Setup
             glEnable(GL_DEPTH_TEST); // Enables Depth Testing
             glDepthFunc(GL_LEQUAL); 
-            glEnable(GL_ALPHA_TEST);
             glAlphaFunc(GL_GREATER, 0.01);
 
             //Prise en compte de la transparence
+            glEnable(GL_ALPHA_TEST);
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 

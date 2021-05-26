@@ -101,19 +101,19 @@ float computeZ (float x, float y, float* map, int mapWidth, int mapHeight, float
 
 //Convertit les coordonnees en pixels d'un point en coordonnees geometriques
 Point3D transfoIndiceToGeometry(Point3D point, int mapWidth, int mapHeight, Timac *timac) {
-    point.x=((point.x/(float)(mapWidth-1))* timac->Xsize)-(timac->Xsize)/2;
-    point.y=((point.y/(float)(mapHeight-1))* timac->Ysize)-(timac->Ysize)/2;
+    point.x=((point.x/(float)(mapHeight-1))* timac->Xsize)-(timac->Xsize)/2;
+    point.y=((point.y/(float)(mapWidth-1))* timac->Ysize)-(timac->Ysize)/2;
     point.z=timac->Zmin + (point.z)*(timac->Zmax - timac->Zmin);
     return point;
 }
 
 //Transforme des coordonnées geometriques en indices dans le tableau
 float transfoXGeometryToIndice(float x, int mapWidth, int mapHeight, Timac *timac) {
-    float ix= ((x + timac->Xsize/2.)/timac->Xsize) * (float)(mapWidth-1);
+    float ix= ((x + timac->Xsize/2.)/timac->Xsize) * (float)(mapHeight-1);
     return ix;
 }
 float transfoYGeometryToIndice(float y, int mapWidth, int mapHeight, Timac *timac) {
-    float iy= ((y + timac->Ysize/2.)/timac->Ysize) * (float)(mapHeight-1);
+    float iy= ((y + timac->Ysize/2.)/timac->Ysize) * (float)(mapWidth-1);
     return iy;
 }
 

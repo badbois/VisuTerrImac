@@ -111,6 +111,7 @@ int* lecturePGM(string nameHeightMap, int *width, int *height, int *grayLvl){
     if(monFlux){
         //On skip la premiere ligne qui donne la version
         getline(monFlux, line);
+        //On skip la ligne donnee par gimp
         getline(monFlux, line);
 
         //On lit la ligne contenant la width et height du .PGM et on les places dans les variables
@@ -134,12 +135,15 @@ int* lecturePGM(string nameHeightMap, int *width, int *height, int *grayLvl){
         getline(monFlux,line);
         *grayLvl=atoi(line.c_str());
 
+
         //On recupere tout le tableau de la map
-        string ligne[*height * *width];
-        int *map=(int*) malloc(sizeof(int)*(*height * *width));
-        for(int i=0; i<*height * *width; i++){
-            getline(monFlux,ligne[i]);
-            map[i]=atoi(ligne[i].c_str());
+        int size = *height * *width;
+        string ligne;
+        int b;
+        int *map=(int*) malloc(sizeof(int)*(size));
+        for(int i=0; i<size; i++){
+            getline(monFlux,ligne);
+            map[i]=atoi(ligne.c_str());
         }
         return map;
     }else{
