@@ -9,7 +9,7 @@ void drawQuadTreeLOD(Node* quadtree, Light soleil, GLuint texture[], Camera came
         if (quadtree->isLeaf()) {
             updateZ(quadtree, map, mapWidth, mapHeight, grayLvl);
             textureToDrawTriangles(*quadtree, soleil, texture, grayLvlRatio);
-        } else if (distanceFromQuad(*quadtree, camera)>(2*timac->Xsize/(quadtree->depth+1))) {
+        } else if (distanceFromQuad(*quadtree, camera)>(1.5*timac->Zfar/(quadtree->depth+1))) {
             updateZ(quadtree, map, mapWidth,mapHeight,  grayLvl);
             textureToDrawTriangles(*quadtree, soleil, texture, grayLvlRatio);
 
@@ -117,7 +117,7 @@ void drawQuadTreeLinesLOD(Node* quadtree, Camera camera, float* map, int mapWidt
         if (quadtree->isLeaf()) {
             updateZ(quadtree, map, mapWidth, mapHeight, grayLvl);
             drawTrianglesLines(*quadtree, thickness);
-        } else if (distanceFromQuad(*quadtree, camera)>(1.3*(timac->Xsize)/(quadtree->depth+1))) {
+        } else if (distanceFromQuad(*quadtree, camera)>(1.5*(timac->Zfar)/(quadtree->depth+1))) {
             updateZ(quadtree, map, mapWidth, mapHeight, grayLvl);
             drawTrianglesLines(*quadtree, thickness);
 
@@ -194,7 +194,6 @@ void drawBillboard(float phi, GLuint texture, Point3D scale, Light Soleil) {
             glBindTexture(GL_TEXTURE_2D, texture);
             glBegin(GL_QUADS);
 
-                //ColorRGB eclairage = illuminationLambert(createPoint(0.,-0.5,1.), createPoint(0.,0.5,1.), createPoint(0.,0.5,0.), Soleil);
                 ColorRGB eclairage = illuminationLambert(createPoint(0.5,0.,0.), createPoint(0.,0.,0.), createPoint(0.,0.5,0.), Soleil);
                 glColor3f(eclairage.r,eclairage.g,eclairage.b);
 
