@@ -19,6 +19,9 @@ Vector3D createVectorFromPoints(Point3D p1, Point3D p2);
 // Addition des vecteurs V1 et V2
 Vector3D addVectors(Vector3D v1, Vector3D v2);
 
+// Soustraction de deux vecteur
+Vector3D subVectors(Vector3D v1, Vector3D v2);
+
 // Multiplication et division d'un vecteur V par un scalaire a
 Vector3D multVector(Vector3D v, float a);
 Vector3D divVector(Vector3D v, float a);

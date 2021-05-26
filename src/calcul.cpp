@@ -54,7 +54,7 @@ float min(float x, float y) {
 
 //regarde si le point x,y est dans le terrain. Si oui renvoie le Z, sinon renvoie 0
 float computeZ (float x, float y, float* map, int mapWidth, int mapHeight, float grayLvl, Timac *timac) {
-    if (abs(x)/2.>(timac->Xsize)/2. || abs(y)>(timac->Ysize)/2.) {
+    if (abs(x)>(timac->Xsize)/2. || abs(y)>(timac->Ysize)/2.) {
         return 0;
     }
     
@@ -101,8 +101,8 @@ float computeZ (float x, float y, float* map, int mapWidth, int mapHeight, float
 
 //Convertit les coordonnees en pixels d'un point en coordonnees geometriques
 Point3D transfoIndiceToGeometry(Point3D point, int mapWidth, int mapHeight, Timac *timac) {
-    point.x=((point.x/(float)(mapWidth-1))* timac->Xsize)-(timac->Xsize)/2.;
-    point.y=((point.y/(float)(mapHeight-1))* timac->Ysize)-(timac->Ysize)/2.;
+    point.x=((point.x/(float)(mapWidth-1))* timac->Xsize)-(timac->Xsize)/2;
+    point.y=((point.y/(float)(mapHeight-1))* timac->Ysize)-(timac->Ysize)/2;
     point.z=timac->Zmin + (point.z)*(timac->Zmax - timac->Zmin);
     return point;
 }

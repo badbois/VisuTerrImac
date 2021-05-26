@@ -3,12 +3,12 @@
 #include <random>
 
 //linux
-#include <GL/gl.h> 
-#include <GL/glu.h>
+// #include <GL/gl.h> 
+// #include <GL/glu.h>
 
 //mac
-//#include <OpenGl/gl.h>
-//#include <OpenGl/glu.h>
+#include <OpenGl/gl.h>
+#include <OpenGl/glu.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -30,18 +30,6 @@ static const char WINDOW_TITLE[] = "Projet";
 static int currentWidth;
 static int currentHeight;
 
-/* Gestion mouvement camera */
-static int flagCamUp = 0;
-static int flagCamDown = 0;
-static int flagCamLeft = 0;
-static int flagCamRight = 0;
-static int flagCamForward = 0;
-static int flagCamBackward = 0;
-static int flagCamPanLeft = 0;
-static int flagCamPanRight = 0;
-static int flagCamTiltUp = 0;
-static int flagCamTiltDown = 0;
-static int flagFPS = 1;
 static int validateMenu = 0;
 
 // phi 3. pour etre aligné sur axe 
@@ -168,30 +156,18 @@ int main(int argc, char** argv)
         }
     }    
 
-    //Camera
+    
 
-    Camera camera;
-    camera.posCam = createPoint(10.,7.,1.);
-    camera.viseCam = createPoint(0.,0.,0.);
-    camera.up = createPoint(0.,0.,1.);
-
-    // glu
-  
-    onWindowResized(WINDOW_WIDTH, WINDOW_HEIGHT, camera, &timac);
+    
 
     // Texture
 
-    GLuint tabTextureId[6];
-    char* name[6]={"assets/grass_5.jpg","assets/grass_4.jpg", "assets/grass_3.jpg", "assets/grass_2.jpg","assets/grass_1.jpg", 
-                    "assets/skybox_top.jpg"};
-    for(int i = 0; i<6; i++){
+    GLuint tabTextureId[7];
+    char* name[7]={"assets/grass_5.jpg","assets/grass_4.jpg", "assets/grass_3.jpg", "assets/grass_2.jpg","assets/grass_1.jpg", 
+                    "assets/skybox_top.jpg", "assets/menu.jpg"};
+    for(int i = 0; i<7; i++){
         tabTextureId[i] = generateTexture(name[i]);
     }
-
-    // Texture menu
-
-    char* textureMenu = {"assets/menu.jpg"};
-    GLuint menuTexture = generateTexture(textureMenu);
 
     //Billboard
     SDL_Surface* imageBill = IMG_Load("./assets/tree.png");
@@ -221,120 +197,134 @@ int main(int argc, char** argv)
     normale3 = addVectors(s3, normale3);
     
     float* mapCopy = (float*) malloc(sizeof(float)*(height*width));
+
+    //Camera
+
+    Flags cameraFlags= createFlags();
+    Camera camera;
+    Point3D centreMap=createPoint(timac.Xsize/2,timac.Ysize/2, computeZ(timac.Xsize/2,timac.Ysize/2, mapCopy, width, height, grayLvl, &timac));
+    camera.posCam = createPoint(1.,1., 3.); // pk pas 0 ???
+    camera.viseCam = createPoint(0.,0.,0.);
+    camera.up = createPoint(0.,0.,1.);
+
+    // glu
+  
+    onWindowResized(WINDOW_WIDTH, WINDOW_HEIGHT, camera, &timac);
+
     /* Boucle principale */
     int loop = 1;
     while(loop) 
     {
         /* Recuperation du temps au debut de la boucle */
-        Uint32 startTime = SDL_GetTicks();
+            Uint32 startTime = SDL_GetTicks();
 
-        // Gestion Soleil
-        if (switchSun == 1) {
-            angleSoleil += (2*M_PI)/500;
-        }
-        Vector3D rayonSoleil = createPoint(100.*cos(angleSoleil),0.,100.*sin(angleSoleil));
-        ColorRGB couleurSoleil = createColor(2.,2.,2.);
-        Light Soleil = createSun(rayonSoleil, couleurSoleil);
-
-        /* Placer ici le code de dessin */
-        glClear(GL_COLOR_BUFFER_BIT);
-        glClear(GL_DEPTH_BUFFER_BIT);
-        glMatrixMode(GL_MODELVIEW);
-
-        // Skybox
-        glPushMatrix();
-        glDepthMask(GL_FALSE);
-        glTranslatef(camera.posCam.x, camera.posCam.y, camera.posCam.z);
-        drawCenteredBox(5., couleurCiel, tabTextureId);
-        glDepthMask(GL_TRUE);
-        glPopMatrix();
-
-        //Prise en compte de la profondeur
-        glClearDepth(1.0f); // Depth Buffer Setup
-        glEnable(GL_DEPTH_TEST); // Enables Depth Testing
-        glDepthFunc(GL_LEQUAL); 
-        glEnable(GL_ALPHA_TEST);
-        glAlphaFunc(GL_GREATER, 0.01);
-
-        //Prise en compte de la transparence
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        //Origine et triangles
-        drawOrigin();       
-        glPushMatrix();
-        
-        for(int i=0; i<(height*width); i++){
-            mapCopy[i] = (float) map[i];
-        }
-        if (switchWireframe == 0) {
-            couleurCiel = illuminationLambert(createPoint(0.5,0.,0.), createPoint(0.,0.,0.), createPoint(0.,0.5,0.), Soleil);
-            drawQuadTreeLOD(quadtree, Soleil, tabTextureId, camera, mapCopy, width,height, grayLvl, timac.Zfar, angleHorizontal, grayLvlRatio, &timac);
-        } else {
-            couleurCiel = createColor(0., 0., 0.1);
-            drawQuadTreeLinesLOD(quadtree,camera, mapCopy, width, height, timac.Zfar, angleHorizontal, grayLvl, &timac);
-        }
-        glPopMatrix();
-
-        // test Billboard
-        std::default_random_engine generator;
-        std::uniform_real_distribution<float> distribution(-(timac.Xsize)/2,(timac.Xsize)/2);
-
-        if (switchWireframe == 0) {
-                for (int i = 0; i <(timac.Xsize)/2.; i++) {
-                glPushMatrix();
-                srand(4*i);
-                float x=distribution(generator);
-                std::uniform_real_distribution<float> distribution(-(timac.Ysize)/2,(timac.Ysize)/2);
-                float y= distribution(generator);
-                float z = computeZ(x, y, mapCopy, width, height, grayLvl, &timac)-0.1;
-                glTranslatef(x, y, z);
-                drawBillboard(phi, bill , createPoint(0.,3.,3.), Soleil);
-                glPopMatrix();
-            }
-        }
-
-          // Activation et désactivation du menu
-
+        // Activation et désactivation du menu
         if(validateMenu == 1){
-        drawMenu(menuTexture, camera, phi, teta);
-        }
-        
-        
-        // Gestion caméra
-        if(flagFPS==1) { // on désactive les mouvements vers le haut et bas
-            flagCamUp = 0; 
-            flagCamDown = 0;
-        }
-        camera = moveCamera(camera, flagCamUp, flagCamDown, flagCamLeft, flagCamRight,
-                            flagCamForward, flagCamBackward, flagCamTiltDown, flagCamTiltUp,
-                            flagCamPanLeft, flagCamPanRight, &teta, &phi);
-        if(flagFPS==1) {
-            camera.posCam.z = computeZ(camera.posCam.x, camera.posCam.y, mapCopy, width, height, grayLvl, &timac)+1.;
+            drawMenu(tabTextureId[6], camera, phi, teta);
+        }else{
+            
+
+            // Gestion Soleil
+            if (switchSun == 1) {
+                angleSoleil += (2*M_PI)/500;
+            }
+            Vector3D rayonSoleil = createPoint(100.*cos(angleSoleil),0.,100.*sin(angleSoleil));
+            ColorRGB couleurSoleil = createColor(2.,2.,2.);
+            Light Soleil = createSun(rayonSoleil, couleurSoleil);
+
+            /* Placer ici le code de dessin */
+            glClear(GL_COLOR_BUFFER_BIT);
+            glClear(GL_DEPTH_BUFFER_BIT);
+            glMatrixMode(GL_MODELVIEW);
+
+            // Skybox
+            glPushMatrix();
+            glDepthMask(GL_FALSE);
+            glTranslatef(camera.posCam.x, camera.posCam.y, camera.posCam.z);
+            drawCenteredBox(5., couleurCiel, tabTextureId);
+            glDepthMask(GL_TRUE);
+            glPopMatrix();
+
+            //Prise en compte de la profondeur
+            glClearDepth(1.0f); // Depth Buffer Setup
+            glEnable(GL_DEPTH_TEST); // Enables Depth Testing
+            glDepthFunc(GL_LEQUAL); 
+            glEnable(GL_ALPHA_TEST);
+            glAlphaFunc(GL_GREATER, 0.01);
+
+            //Prise en compte de la transparence
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+            //Origine et triangles
+            drawOrigin();       
+            glPushMatrix();
+            
+            for(int i=0; i<(height*width); i++){
+                mapCopy[i] = (float) map[i];
+            }
+            if (switchWireframe == 0) {
+                couleurCiel = illuminationLambert(createPoint(0.5,0.,0.), createPoint(0.,0.,0.), createPoint(0.,0.5,0.), Soleil);
+                drawQuadTreeLOD(quadtree, Soleil, tabTextureId, camera, mapCopy, width,height, grayLvl, timac.Zfar, angleHorizontal, grayLvlRatio, &timac);
+            } else {
+                couleurCiel = createColor(0., 0., 0.1);
+                drawQuadTreeLinesLOD(quadtree,camera, mapCopy, width, height, timac.Zfar, angleHorizontal, grayLvl, &timac);
+            }
+            glPopMatrix();
+
+            // test Billboard
+            std::default_random_engine generator;
+            std::uniform_real_distribution<float> distribution(-(timac.Xsize)/2,(timac.Xsize)/2);
+
+            if (switchWireframe == 0) {
+                    for (int i = 0; i <(timac.Xsize)/2.; i++) {
+                    glPushMatrix();
+                    srand(4*i);
+                    float x=distribution(generator);
+                    std::uniform_real_distribution<float> distribution(-(timac.Ysize)/2,(timac.Ysize)/2);
+                    float y= distribution(generator);
+                    float z = computeZ(x, y, mapCopy, width, height, grayLvl, &timac)-0.1;
+                    glTranslatef(x, y, z);
+                    drawBillboard(phi, bill , createPoint(0.,3.,3.), Soleil);
+                    glPopMatrix();
+                }
+            }
+
+            
+            
+            // Gestion caméra
+            if(cameraFlags.flagFPS==1) { // on désactive les mouvements vers le haut et bas
+                cameraFlags.flagCamUp = 0; 
+                cameraFlags.flagCamDown = 0;
+            }
+            camera = moveCamera(camera, &cameraFlags, &teta, &phi, &timac);
+            if(cameraFlags.flagFPS==1) {
+                camera.posCam.z = computeZ(camera.posCam.x, camera.posCam.y, mapCopy, width, height, grayLvl, &timac)+1.;
+            }
+
         }
         onWindowResized(currentWidth, currentHeight, camera, &timac);
-
-        
+         
         /* Echange du front et du back buffer : mise a jour de la fenetre */
         SDL_GL_SwapWindow(window);
-        
+            
         /* Boucle traitant les evenements */
         SDL_Event e;
         while(SDL_PollEvent(&e)) 
         {
             /* L'utilisateur ferme la fenetre : */
-			if(e.type == SDL_QUIT) 
-			{
-				loop = 0;
-				break;
-			}
-		
-			if(	e.type == SDL_KEYDOWN 
-				&& (e.key.keysym.sym == SDLK_ESCAPE))
-			{
-				loop = 0; 
-				break;
-			}
+            if(e.type == SDL_QUIT) 
+            {
+                loop = 0;
+                break;
+            }
+        
+            if(	e.type == SDL_KEYDOWN 
+                && (e.key.keysym.sym == SDLK_ESCAPE))
+            {
+                loop = 0; 
+                break;
+            }
             
             switch(e.type) 
             {
@@ -360,44 +350,44 @@ int main(int argc, char** argv)
                 case SDL_KEYDOWN:
                     //printf("touche pressee (code = %d)\n", e.key.keysym.sym);
                     if (e.key.keysym.sym == 104 && e.key.repeat == 0) { //H (haut)
-                        flagCamUp = 1;
-                        flagCamDown = 0;
+                        cameraFlags.flagCamUp = 1;
+                        cameraFlags.flagCamDown = 0;
                     }
                     if (e.key.keysym.sym == 98 && e.key.repeat == 0) { //B(bas)
-                        flagCamDown = 1;
-                        flagCamUp = 0;
+                        cameraFlags.flagCamDown = 1;
+                        cameraFlags.flagCamUp = 0;
                     }
                     if (e.key.keysym.sym == 1073741904 && e.key.repeat == 0) { // Flèche gauche  
-                        flagCamLeft = 1;
-                        flagCamRight = 0;
+                        cameraFlags.flagCamLeft = 1;
+                        cameraFlags.flagCamRight = 0;
                     }
                     if (e.key.keysym.sym == 1073741903 && e.key.repeat == 0) { // Flèche droite 
-                        flagCamRight = 1;
-                        flagCamLeft = 0;
+                        cameraFlags.flagCamRight = 1;
+                        cameraFlags.flagCamLeft = 0;
                     }
                     if (e.key.keysym.sym == 1073741906 && e.key.repeat == 0) { // Flèche haut (devant)  
-                        flagCamForward = 1;
-                        flagCamBackward = 0;
+                        cameraFlags.flagCamForward = 1;
+                        cameraFlags.flagCamBackward = 0;
                     }
                     if (e.key.keysym.sym == 1073741905 && e.key.repeat == 0) { // Flèche bas (derrière) 
-                        flagCamBackward = 1;
-                        flagCamForward = 0;
+                        cameraFlags.flagCamBackward = 1;
+                        cameraFlags.flagCamForward = 0;
                     }
                     if (e.key.keysym.sym == 122 && e.key.repeat == 0) { // Z (tilt up) 
-                        flagCamTiltUp= 1;
-                        flagCamTiltDown = 0;
+                        cameraFlags.flagCamTiltUp= 1;
+                        cameraFlags.flagCamTiltDown = 0;
                     }
                     if (e.key.keysym.sym == 115 && e.key.repeat == 0) { // S (tilt down) 
-                        flagCamTiltDown = 1;
-                        flagCamTiltUp = 0;
+                        cameraFlags.flagCamTiltDown = 1;
+                        cameraFlags.flagCamTiltUp = 0;
                     }
                     if (e.key.keysym.sym == 113 && e.key.repeat == 0) { // Q (pan left) 
-                        flagCamPanLeft = 1;
-                        flagCamPanRight = 0;
+                        cameraFlags.flagCamPanLeft = 1;
+                        cameraFlags.flagCamPanRight = 0;
                     }
                     if (e.key.keysym.sym == 100 && e.key.repeat == 0) { // D (pan right) 
-                        flagCamPanRight = 1;
-                        flagCamPanLeft = 0;
+                        cameraFlags.flagCamPanRight = 1;
+                        cameraFlags.flagCamPanLeft = 0;
                     }
                     if (e.key.keysym.sym == 108) { // l (light, soleil qui tourne)
                         switchSun = 1-switchSun;
@@ -405,8 +395,8 @@ int main(int argc, char** argv)
                     if (e.key.keysym.sym == 102) { // f (mode filaire)
                         switchWireframe = 1-switchWireframe;
                     }
-                    if (e.key.keysym.sym == 99) { // c camera (mode FPS)
-                        flagFPS = 1-flagFPS;
+                    if (e.key.keysym.sym == 99 && (abs(camera.posCam.x)<=(timac.Xsize)/2. && abs(camera.posCam.y)<=(timac.Ysize)/2.)) { // c camera (mode FPS)
+                        cameraFlags.flagFPS = 1 - cameraFlags.flagFPS;
                     }
                     if(e.key.keysym.sym == SDLK_RETURN || e.key.keysym.sym == SDLK_KP_ENTER) {  // appuyer sur entrer 
                         if(validateMenu == 1){
@@ -419,34 +409,34 @@ int main(int argc, char** argv)
                     break;
                 case SDL_KEYUP:
                     if (e.key.keysym.sym == 104) { //H (haut)
-                        flagCamUp = 0;
+                        cameraFlags.flagCamUp = 0;
                     }
                     if (e.key.keysym.sym == 98) { //B(bas)
-                        flagCamDown = 0;
+                        cameraFlags.flagCamDown = 0;
                     }
                     if (e.key.keysym.sym == 1073741904) { // Flèche gauche  
-                        flagCamLeft = 0;
+                        cameraFlags.flagCamLeft = 0;
                     }
                     if (e.key.keysym.sym == 1073741903) { // Flèche droite 
-                        flagCamRight = 0;
+                        cameraFlags.flagCamRight = 0;
                     }
                     if (e.key.keysym.sym == 1073741906) { // Flèche haut (devant) 
-                        flagCamForward = 0;
+                        cameraFlags.flagCamForward = 0;
                     }
                     if (e.key.keysym.sym == 1073741905) { // Flèche bas (derrière)
-                        flagCamBackward = 0;
+                        cameraFlags.flagCamBackward = 0;
                     }
                     if (e.key.keysym.sym == 122) { // Z (tilt up) 
-                        flagCamTiltUp= 0;
+                        cameraFlags.flagCamTiltUp= 0;
                     }
                     if (e.key.keysym.sym == 115) { // S (tilt down) 
-                        flagCamTiltDown = 0;
+                        cameraFlags.flagCamTiltDown = 0;
                     }
                     if (e.key.keysym.sym == 113) { // Q (pan left) 
-                        flagCamPanLeft = 0;
+                        cameraFlags.flagCamPanLeft = 0;
                     }
                     if (e.key.keysym.sym == 100) { // D (pan right) 
-                        flagCamPanRight = 0;
+                        cameraFlags.flagCamPanRight = 0;
                     }
                     break;
                     

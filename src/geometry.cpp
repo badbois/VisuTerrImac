@@ -45,6 +45,16 @@ Vector3D addVectors(Vector3D v1, Vector3D v2) {
     return vector;
 }
 
+// Soustraction de deux vecteur
+Vector3D subVectors(Vector3D v1, Vector3D v2) {
+    Vector3D vector;
+    vector.x = v1.x - v2.x;
+    vector.y = v1.y - v2.y;
+    vector.z = v1.z - v2.z;
+
+    return vector;
+}
+
 // Multiplication et division d'un vecteur V par un scalaire a
 Vector3D multVector(Vector3D v, float a) {
     Vector3D vector;

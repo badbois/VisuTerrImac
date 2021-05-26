@@ -232,16 +232,24 @@ void drawMenu(GLuint texture, Camera camera, float phi, float teta){
     glBegin(GL_QUADS);     
 
         glTexCoord2f(0.,0.);
-        glVertex3f(0.,1.,0.6);        
+        //glVertex3f(0.,1.,0.6); 
+        glVertex3f(0.,1.,0.5625);        
 
         glTexCoord2f(1.,0.);
-        glVertex3f(0.,-1.,0.6);
+        //glVertex3f(0.,-1.,0.6);
+        glVertex3f(0.,-1.,0.5625);   
+    
         
         glTexCoord2f(1.,1.);
-        glVertex3f(0.,-1.,-0.6);
+        //glVertex3f(0.,-1.,-0.6);
+        glVertex3f(0.,-1.,-0.5625);
+
 
         glTexCoord2f(0.,1.);
-        glVertex3f(0.,1.,-0.6);
+        //glVertex3f(0.,1.,-0.6);
+        glVertex3f(0.,1.,-0.5625);
+
+        
         
     glEnd();
     glBindTexture(GL_TEXTURE_2D, 0);

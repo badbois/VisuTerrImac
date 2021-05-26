@@ -11,6 +11,22 @@ Light createSun (Vector3D rayon, ColorRGB couleur) {
     return lumiere;
 }
 
+Flags createFlags(){
+    Flags flags;
+    flags.flagCamUp = 0;
+    flags.flagCamDown = 0;
+    flags.flagCamLeft = 0;
+    flags.flagCamRight = 0;
+    flags.flagCamForward = 0;
+    flags.flagCamBackward = 0;
+    flags.flagCamPanLeft = 0;
+    flags.flagCamPanRight = 0;
+    flags.flagCamTiltUp = 0;
+    flags.flagCamTiltDown = 0;
+    flags.flagFPS= 0;
+    return flags;
+}
+
 //Retourne la couleur calculee d'apres l'illumination par la formule de Lambert
 ColorRGB illuminationLambert(Point3D s1, Point3D s2, Point3D s3, Light Soleil) {
     ColorRGB couleurPoint = createColor(0.1,0.,0.3);
@@ -32,50 +48,66 @@ void orienteCamera(Camera camera){
 }
 
 //Deplacement de la camera
-Camera moveCamera (Camera camera, int flagCamUp, int flagCamDown, int flagCamLeft, int flagCamRight,
-                    int flagCamForward, int flagCamBackward, int flagCamTiltDown, int flagCamTiltUp, 
-                    int flagCamPanLeft, int flagCamPanRight, float* teta, float* phi) {
+Camera moveCamera (Camera camera, Flags *flags, float* teta, float* phi, Timac *timac) {
 
-    camera.posCam.z += flagCamUp * 0.01;
-    camera.posCam.z -= flagCamDown * 0.01;
+    camera.posCam.z += flags->flagCamUp * 0.01;
+    camera.posCam.z -= flags->flagCamDown * 0.01;
 
     Vector3D dirCiel = createVector(0.,0.,1.);
     Vector3D dirRegard = createVectorFromPoints(camera.posCam, camera.viseCam);
 
     Vector3D Left = produitVectoriel(dirCiel, dirRegard);
     Left = normalize(Left);
-    Vector3D pasLeft = multVector(Left, (0.05*flagCamLeft));
+    Vector3D pasLeft = multVector(Left, (0.05*flags->flagCamLeft));
     camera.posCam = addVectors(camera.posCam, pasLeft);
+    //cout<< camera.posCam.z << endl;
+    //cout << ((-timac->Zmax)+1) << endl;
+    if((abs(camera.posCam.x)>(timac->Xsize)/2. || abs(camera.posCam.y)>(timac->Ysize)/2.) && flags->flagFPS==1){
+        cout << camera.posCam.z << " left." << endl;
+        camera.posCam = subVectors(camera.posCam, pasLeft);
+    }
 
     Vector3D up = produitVectoriel(dirRegard, Left);
     camera.up = up;
 
-    Vector3D pasRight = multVector(Left, (-0.05*flagCamRight));
+    Vector3D pasRight = multVector(Left, (-0.05*flags->flagCamRight));
     camera.posCam = addVectors(camera.posCam, pasRight);
+    if((abs(camera.posCam.x)>(timac->Xsize)/2. || abs(camera.posCam.y)>(timac->Ysize)/2.)&& flags->flagFPS==1){
+        cout << camera.posCam.z << " right." << endl;
+        camera.posCam = subVectors(camera.posCam, pasRight);
+    }
 
     Vector3D Forward = produitVectoriel(Left, dirCiel);
     Forward = normalize(Forward);
-    Vector3D pasForward = multVector(Forward, (0.05*flagCamForward));
+    Vector3D pasForward = multVector(Forward, (0.05*flags->flagCamForward));
     camera.posCam = addVectors(camera.posCam, pasForward);
+    if((abs(camera.posCam.x)>(timac->Xsize)/2. || abs(camera.posCam.y)>(timac->Ysize)/2.)&& flags->flagFPS==1){
+        cout << camera.posCam.z << " forward." << endl;
+        camera.posCam = subVectors(camera.posCam, pasForward);
+    }
 
-    Vector3D pasBackward = multVector(Forward, (-0.05*flagCamBackward));
+    Vector3D pasBackward = multVector(Forward, (-0.05*flags->flagCamBackward));
     camera.posCam = addVectors(camera.posCam, pasBackward);
+    if((abs(camera.posCam.x)>(timac->Xsize)/2. || abs(camera.posCam.y)>(timac->Ysize)/2.)&& flags->flagFPS==1){
+        cout << camera.posCam.z << " backward." << endl;
+        camera.posCam = subVectors(camera.posCam, pasBackward);
+    }
 
 
-    if (flagCamTiltUp == 1) {
+    if (flags->flagCamTiltUp == 1) {
         if(*teta < 1.5) {
             *teta += 0.015;
         }
     }
-    if (flagCamTiltDown == 1) {
+    if (flags->flagCamTiltDown == 1) {
         if (*teta > -1.5) {
             *teta -= 0.015;
         }
     }
-    if (flagCamPanLeft == 1) {
+    if (flags->flagCamPanLeft == 1) {
         *phi += 0.015;
     }
-    if (flagCamPanRight == 1) {
+    if (flags->flagCamPanRight == 1) {
         *phi -= 0.015;
     }
 
