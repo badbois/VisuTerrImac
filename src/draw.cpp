@@ -374,8 +374,8 @@ void drawCenteredBox(float length, ColorRGB couleurCiel, GLuint* textureSky) {
     glColor3fv(currentColor);
 }
 
-//Prend un nom de texture en parametre et retourne la texture associee
-GLuint generateTexture(char* name){
+//Prend un nom de texture .jpg en parametre et retourne la texture associee
+GLuint generateTextureJpg(char* name){
     GLuint textureId;
     
     SDL_Surface* image = IMG_Load(name);
@@ -383,6 +383,19 @@ GLuint generateTexture(char* name){
     glBindTexture(GL_TEXTURE_2D, textureId);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image->w, image->h, 0, GL_RGB, GL_UNSIGNED_BYTE, image->pixels);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    return textureId;
+}
+
+//Prend un nom de texture .png en parametre et retourne la texture associee
+GLuint generateTexturePng(char* name){
+    GLuint textureId;
+    
+    SDL_Surface* image = IMG_Load(name);
+    glGenTextures(1, &textureId);
+    glBindTexture(GL_TEXTURE_2D, textureId);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image->w, image->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, image->pixels);
     glBindTexture(GL_TEXTURE_2D, 0);
     return textureId;
 }

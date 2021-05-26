@@ -44,8 +44,11 @@ void drawOrigin();
 //Dessine la Skybox
 void drawCenteredBox(float length, ColorRGB couleurCiel, GLuint* textureSky);
 
-//Prend un nom de texture en parametre et retourne la texture associee
-GLuint generateTexture(char* name);
+//Prend un nom de texture .jpg en parametre et retourne la texture associee
+GLuint generateTextureJpg(char* name);
+
+//Prend un nom de texture .png en parametre et retourne la texture associee
+GLuint generateTexturePng(char* name);
 
 
 

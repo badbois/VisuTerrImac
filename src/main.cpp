@@ -19,27 +19,29 @@
 #include "../include/quadtree.h"
 #include "../include/draw.h"
 #include "../include/calcul.h"
+#include "../include/init.h"
 
 /* Dimensions initiales et titre de la fenetre */
-static const unsigned int WINDOW_WIDTH = 800;
-static const unsigned int WINDOW_HEIGHT = 600;
-static const char WINDOW_TITLE[] = "Projet";
+const unsigned int WINDOW_WIDTH = 800;
+const unsigned int WINDOW_HEIGHT = 600;
+const char WINDOW_TITLE[] = "Projet";
 
 /* Espace fenetre virtuelle */
-//static const float GL_VIEW_SIZE = 8.;
 static int currentWidth;
 static int currentHeight;
 
 static int validateMenu = 0;
 
-// phi 3. pour etre aligné sur axe 
+// angle de camera 
 static float phi = 0.;
 static float teta = 0.; 
 
-/*Soleil*/
+/*Soleil tournant ou non*/
 int switchSun = 0;
+
 /*Couleur Skybox*/
 ColorRGB couleurCiel = createColor(0.5, 0.5, 0.9);
+
 /*Mode filaire*/
 int switchWireframe = 0;
 
@@ -49,6 +51,8 @@ float angleHorizontal;
 
 /* Nombre minimal de millisecondes separant le rendu de deux images */
 static const Uint32 FRAMERATE_MILLISECONDS = 1000 / 60;
+
+
 
 void onWindowResized(unsigned int width, unsigned int height, Camera camera, Timac *timac)
 { 
@@ -73,142 +77,63 @@ void onWindowResized(unsigned int width, unsigned int height, Camera camera, Tim
 
 int main(int argc, char** argv) 
 {
-    //Implementation et test de la lecture de fichiers
+    //Lecture des fichier .timac et .pgm
     std::string nameHeightMap;
-    int test;
+    int tmp, width, height, grayLvl;
     Timac timac=createTimac();
-    int width, height, grayLvl;
-    test=lectureFichier(&timac);
-    if (!test){
+    
+    tmp=lectureFichier(&timac);
+    if (!tmp){
+        cerr << "impossible de lire le fichier .timac" << endl;
         return EXIT_FAILURE;
     }
 
     int *map=lecturePGM(timac.nameHeightMap, &width, &height, &grayLvl);
     if(map==NULL){
+        cerr << "impossible de lire le fichier .pgm" << endl;
         return EXIT_FAILURE;
     };
 
-    float grayLvlRatio=  timac.Zmax-timac.Zmin;
-    Point3D trucA = createPoint(0.,0.,0.);
-    Point3D trucB = createPoint(0., (float)(width-1), 0.);
-    Point3D trucC = createPoint((float)(height-1), (float)(width-1), 0.);
-    Point3D trucD = createPoint((float)(height-1),0.,0.);
+    float grayLvlRatio= timac.Zmax-timac.Zmin;
 
-    Node* quadtree = Node::createQuadTree(trucA,trucB,trucC,trucD,map,width, height, 0, (float)grayLvl, &timac);
+    //Creation du quadtree
+    Point3D pointA = createPoint(0.,0.,0.);
+    Point3D pointB = createPoint(0., (float)(width-1), 0.);
+    Point3D pointC = createPoint((float)(height-1), (float)(width-1), 0.);
+    Point3D pointD = createPoint((float)(height-1),0.,0.);
+    Node* quadtree = Node::createQuadTree(pointA,pointB,pointC,pointD,map,width, height, 0, (float)grayLvl, &timac);
 
 
     //* Initialisation de la SDL */
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE,32); 
-
-
-    if(SDL_Init(SDL_INIT_VIDEO) < 0) 
-    {
-        const char* error = SDL_GetError();
-        fprintf(
-            stderr, 
-            "Erreur lors de l'intialisation de la SDL : %s\n", error);
-
-        SDL_Quit();
-        return EXIT_FAILURE;
-    }
-	
-    /* Ouverture d'une fenetre et creation d'un contexte OpenGL */
-
-    SDL_Window* window;
-    {
-        window = SDL_CreateWindow(
-        WINDOW_TITLE,
-        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-        WINDOW_WIDTH, WINDOW_HEIGHT,
-        SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
-
-        if(NULL == window) 
-        {
-            const char* error = SDL_GetError();
-            fprintf(
-                stderr,
-                "Erreur lors de la creation de la fenetre : %s\n", error);
-
-            SDL_Quit();
-            return EXIT_FAILURE;
-        }
-    }
+    SDL_GLContext context;  
+    SDL_Window* window =initSDL(WINDOW_TITLE, WINDOW_WIDTH, WINDOW_HEIGHT, &context);
     
-    SDL_GLContext context;
-    {
-            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
-
-            SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-
-        context = SDL_GL_CreateContext(window);
-    
-        if(NULL == context) 
-        {
-            const char* error = SDL_GetError();
-            fprintf(
-                stderr,
-                "Erreur lors de la creation du contexte OpenGL : %s\n", error);
-
-            SDL_DestroyWindow(window);
-            SDL_Quit();
-            return EXIT_FAILURE;
-        }
-    }    
-
-    
-
-    
-
     // Texture
-
     GLuint tabTextureId[7];
     char* name[7]={"assets/grass_5.jpg","assets/grass_4.jpg", "assets/grass_3.jpg", "assets/grass_2.jpg","assets/grass_1.jpg", 
                     "assets/skybox_top.jpg", "assets/menu.jpg"};
     for(int i = 0; i<7; i++){
-        tabTextureId[i] = generateTexture(name[i]);
+        tabTextureId[i] = generateTextureJpg(name[i]);
     }
 
-    //Billboard
-    SDL_Surface* imageBill = IMG_Load("./assets/tree.png");
-    GLuint bill;
-    glGenTextures(1, &bill);
-    glBindTexture(GL_TEXTURE_2D, bill);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, imageBill->w,imageBill->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageBill->pixels);
-    glBindTexture(GL_TEXTURE_2D,0);
+    //Arbres
+    GLuint arbre;
+    arbre= generateTexturePng("./assets/tree.png");
 
-    // Definition du noeud a dessiner
-
-    Point3D s1 = createPoint(0.,1.,1.);
-    Point3D s2 = createPoint(1.,0.,0.);
-    Point3D s3 = createPoint(0.,-1.,1.);
-    Point3D s4 = createPoint(-1.,0.,0.);
-
-    float angleSoleil = M_PI/4;
-
-    Vector3D normale1 = normaleTriangle (s1, s2, s3);
-    normale1 = addVectors(s1, normale1);
-
-     Vector3D normale2 = normaleTriangle (s2, s3, s1);
-    normale2 = addVectors(s2, normale2);
-
-     Vector3D normale3 = normaleTriangle (s3, s1, s2);
-    normale3 = addVectors(s3, normale3);
-    
+    //Creation de la copie de la map en pixel
     float* mapCopy = (float*) malloc(sizeof(float)*(height*width));
 
     //Camera
-
     Flags cameraFlags= createFlags();
     Camera camera;
-    Point3D centreMap=createPoint(timac.Xsize/2,timac.Ysize/2, computeZ(timac.Xsize/2,timac.Ysize/2, mapCopy, width, height, grayLvl, &timac));
-    camera.posCam = createPoint(1.,1., 3.); // pk pas 0 ???
+    camera.posCam = createPoint(1.,1., 0.); // pk pas 0 ???
     camera.viseCam = createPoint(0.,0.,0.);
     camera.up = createPoint(0.,0.,1.);
 
+    //Soleil
+    float angleSoleil = M_PI/4;
+
     // glu
-  
     onWindowResized(WINDOW_WIDTH, WINDOW_HEIGHT, camera, &timac);
 
     /* Boucle principale */
@@ -218,12 +143,10 @@ int main(int argc, char** argv)
         /* Recuperation du temps au debut de la boucle */
             Uint32 startTime = SDL_GetTicks();
 
-        // Activation et désactivation du menu
+        // Soit on dessine le menu, soit toute la map
         if(validateMenu == 1){
             drawMenu(tabTextureId[6], camera, phi, teta);
-        }else{
-            
-
+        }else{  
             // Gestion Soleil
             if (switchSun == 1) {
                 angleSoleil += (2*M_PI)/500;
@@ -232,12 +155,12 @@ int main(int argc, char** argv)
             ColorRGB couleurSoleil = createColor(2.,2.,2.);
             Light Soleil = createSun(rayonSoleil, couleurSoleil);
 
-            /* Placer ici le code de dessin */
+            // A QUOI CA SERT?
             glClear(GL_COLOR_BUFFER_BIT);
             glClear(GL_DEPTH_BUFFER_BIT);
             glMatrixMode(GL_MODELVIEW);
 
-            // Skybox
+            // Dessin de la skybox
             glPushMatrix();
             glDepthMask(GL_FALSE);
             glTranslatef(camera.posCam.x, camera.posCam.y, camera.posCam.z);
@@ -256,7 +179,7 @@ int main(int argc, char** argv)
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-            //Origine et triangles
+            //Dessin de l'origine et de la map
             drawOrigin();       
             glPushMatrix();
             
@@ -272,10 +195,9 @@ int main(int argc, char** argv)
             }
             glPopMatrix();
 
-            // test Billboard
+            //Dessin des arbres
             std::default_random_engine generator;
             std::uniform_real_distribution<float> distribution(-(timac.Xsize)/2,(timac.Xsize)/2);
-
             if (switchWireframe == 0) {
                     for (int i = 0; i <(timac.Xsize)/2.; i++) {
                     glPushMatrix();
@@ -285,7 +207,7 @@ int main(int argc, char** argv)
                     float y= distribution(generator);
                     float z = computeZ(x, y, mapCopy, width, height, grayLvl, &timac)-0.1;
                     glTranslatef(x, y, z);
-                    drawBillboard(phi, bill , createPoint(0.,3.,3.), Soleil);
+                    drawBillboard(phi, arbre , createPoint(0.,3.,3.), Soleil);
                     glPopMatrix();
                 }
             }
@@ -303,6 +225,8 @@ int main(int argc, char** argv)
             }
 
         }
+
+        //On gere la redimension de la fenetre
         onWindowResized(currentWidth, currentHeight, camera, &timac);
          
         /* Echange du front et du back buffer : mise a jour de la fenetre */

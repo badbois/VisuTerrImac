@@ -23,7 +23,7 @@ Flags createFlags(){
     flags.flagCamPanRight = 0;
     flags.flagCamTiltUp = 0;
     flags.flagCamTiltDown = 0;
-    flags.flagFPS= 0;
+    flags.flagFPS= 1;
     return flags;
 }
 
@@ -60,10 +60,7 @@ Camera moveCamera (Camera camera, Flags *flags, float* teta, float* phi, Timac *
     Left = normalize(Left);
     Vector3D pasLeft = multVector(Left, (0.05*flags->flagCamLeft));
     camera.posCam = addVectors(camera.posCam, pasLeft);
-    //cout<< camera.posCam.z << endl;
-    //cout << ((-timac->Zmax)+1) << endl;
-    if((abs(camera.posCam.x)>(timac->Xsize)/2. || abs(camera.posCam.y)>(timac->Ysize)/2.) && flags->flagFPS==1){
-        cout << camera.posCam.z << " left." << endl;
+    if((abs(camera.posCam.x)>=(timac->Xsize)/2. || abs(camera.posCam.y)>=(timac->Ysize)/2.) && flags->flagFPS==1){
         camera.posCam = subVectors(camera.posCam, pasLeft);
     }
 
@@ -72,8 +69,7 @@ Camera moveCamera (Camera camera, Flags *flags, float* teta, float* phi, Timac *
 
     Vector3D pasRight = multVector(Left, (-0.05*flags->flagCamRight));
     camera.posCam = addVectors(camera.posCam, pasRight);
-    if((abs(camera.posCam.x)>(timac->Xsize)/2. || abs(camera.posCam.y)>(timac->Ysize)/2.)&& flags->flagFPS==1){
-        cout << camera.posCam.z << " right." << endl;
+    if((abs(camera.posCam.x)>=(timac->Xsize)/2. || abs(camera.posCam.y)>=(timac->Ysize)/2.)&& flags->flagFPS==1){
         camera.posCam = subVectors(camera.posCam, pasRight);
     }
 
@@ -81,15 +77,13 @@ Camera moveCamera (Camera camera, Flags *flags, float* teta, float* phi, Timac *
     Forward = normalize(Forward);
     Vector3D pasForward = multVector(Forward, (0.05*flags->flagCamForward));
     camera.posCam = addVectors(camera.posCam, pasForward);
-    if((abs(camera.posCam.x)>(timac->Xsize)/2. || abs(camera.posCam.y)>(timac->Ysize)/2.)&& flags->flagFPS==1){
-        cout << camera.posCam.z << " forward." << endl;
+    if((abs(camera.posCam.x)>=(timac->Xsize)/2. || abs(camera.posCam.y)>=(timac->Ysize)/2.)&& flags->flagFPS==1){
         camera.posCam = subVectors(camera.posCam, pasForward);
     }
 
     Vector3D pasBackward = multVector(Forward, (-0.05*flags->flagCamBackward));
     camera.posCam = addVectors(camera.posCam, pasBackward);
-    if((abs(camera.posCam.x)>(timac->Xsize)/2. || abs(camera.posCam.y)>(timac->Ysize)/2.)&& flags->flagFPS==1){
-        cout << camera.posCam.z << " backward." << endl;
+    if((abs(camera.posCam.x)>=(timac->Xsize)/2. || abs(camera.posCam.y)>=(timac->Ysize)/2.)&& flags->flagFPS==1){
         camera.posCam = subVectors(camera.posCam, pasBackward);
     }
 
