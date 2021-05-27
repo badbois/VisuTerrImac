@@ -187,14 +187,14 @@ void drawTrianglesLines(Node noeud, float thickness){
 }
 
 //Dessine un Billboard 
-void drawBillboard(float phi, GLuint texture, Point3D scale, Light Soleil) {
+void drawBillboard(float phi, GLuint texture, Point3D scale, Light soleil) {
             glRotatef(phi*(360/(2*M_PI)),0.,0.,1.);
             glScalef(scale.x,scale.y,scale.z);
             glEnable(GL_TEXTURE_2D);
             glBindTexture(GL_TEXTURE_2D, texture);
             glBegin(GL_QUADS);
 
-                ColorRGB eclairage = illuminationLambert(createPoint(0.5,0.,0.), createPoint(0.,0.,0.), createPoint(0.,0.5,0.), Soleil);
+                ColorRGB eclairage = illuminationLambert(createPoint(0.5,0.,0.), createPoint(0.,0.,0.), createPoint(0.,0.5,0.), soleil);
                 glColor3f(eclairage.r,eclairage.g,eclairage.b);
 
                 glTexCoord2f(0.,0.);
@@ -215,7 +215,7 @@ void drawBillboard(float phi, GLuint texture, Point3D scale, Light Soleil) {
 }
 
 //Dessine le menu
-void drawMenu(GLuint texture, Camera camera, float phi, float teta){
+void drawMenu(GLuint texture, Camera camera, float phi, float teta, Light soleil){
     
     glPushMatrix();
         glTranslatef(camera.posCam.x, camera.posCam.y, camera.posCam.z);
@@ -229,6 +229,9 @@ void drawMenu(GLuint texture, Camera camera, float phi, float teta){
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, texture);
     glBegin(GL_QUADS);     
+
+        ColorRGB eclairage = illuminationLambert(createPoint(0.5,0.,0.), createPoint(0.,0.,0.), createPoint(0.,0.5,0.), soleil);
+        glColor3f(eclairage.r,eclairage.g,eclairage.b);
 
         glTexCoord2f(0.,0.);
         glVertex3f(0.,0.7,0.6);        

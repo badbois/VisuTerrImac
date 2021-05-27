@@ -146,9 +146,12 @@ int main(int argc, char** argv)
 
         // Soit on dessine le menu, soit toute la map
         if(validateMenu == 1){
+            Vector3D rayonSoleil = createPoint(100.*cos(M_PI/4),0.,100.*sin(M_PI/4));
+            ColorRGB couleurSoleil = createColor(2.,2.,2.);
+            Light soleil = createSun(rayonSoleil, couleurSoleil);
             // On dessine devant tous les arbres etc...
             glDisable(GL_DEPTH_TEST); // Enables Depth Testing
-            drawMenu(tabTextureId[6], camera, phi, teta);
+            drawMenu(tabTextureId[6], camera, phi, teta, soleil);
         }else{  
             // Gestion Soleil
             if (switchSun == 1) {
@@ -156,7 +159,7 @@ int main(int argc, char** argv)
             }
             Vector3D rayonSoleil = createPoint(100.*cos(angleSoleil),0.,100.*sin(angleSoleil));
             ColorRGB couleurSoleil = createColor(2.,2.,2.);
-            Light Soleil = createSun(rayonSoleil, couleurSoleil);
+            Light soleil = createSun(rayonSoleil, couleurSoleil);
 
             // condition initiales de la boucle
             glClear(GL_COLOR_BUFFER_BIT);
@@ -190,8 +193,8 @@ int main(int argc, char** argv)
                 mapCopy[i] = (float) map[i];
             }
             if (switchWireframe == 0) {
-                couleurCiel = illuminationLambert(createPoint(0.5,0.,0.), createPoint(0.,0.,0.), createPoint(0.,0.5,0.), Soleil);
-                drawQuadTreeLOD(quadtree, Soleil, tabTextureId, camera, mapCopy, width,height, grayLvl, timac.Zfar, angleHorizontal, grayLvlRatio, &timac);
+                couleurCiel = illuminationLambert(createPoint(0.5,0.,0.), createPoint(0.,0.,0.), createPoint(0.,0.5,0.), soleil);
+                drawQuadTreeLOD(quadtree, soleil, tabTextureId, camera, mapCopy, width,height, grayLvl, timac.Zfar, angleHorizontal, grayLvlRatio, &timac);
             } else {
                 couleurCiel = createColor(0., 0., 0.1);
                 drawQuadTreeLinesLOD(quadtree,camera, mapCopy, width, height, timac.Zfar, angleHorizontal, grayLvl, &timac);
@@ -213,7 +216,7 @@ int main(int argc, char** argv)
                     //On ne dessine les arbres que s'ils sont assez proche de nous
                     if(sqrt(pow(distance.x,2.)+pow(distance.y,2.))<=(0.2*timac.Zfar)){
                         glTranslatef(x, y, z);
-                        drawBillboard(phi, arbre , createPoint(0.,3.,3.), Soleil);
+                        drawBillboard(phi, arbre , createPoint(0.,3.,3.), soleil);
                     }
                     glPopMatrix();
                 }

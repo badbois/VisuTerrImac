@@ -33,10 +33,10 @@ void drawTriangleLines(Point3D s1, Point3D s2, Point3D s3, float thickness);
 void drawTrianglesLines(Node noeud, float thickness);
 
 //Dessine un Billboard 
-void drawBillboard(float phi, GLuint texture, Point3D scale, Light Soleil);
+void drawBillboard(float phi, GLuint texture, Point3D scale, Light soleil);
 
 //Dessine le menu 
-void drawMenu(GLuint texture, Camera camera, float phi, float teta);
+void drawMenu(GLuint texture, Camera camera, float phi, float teta, Light soleil);
 
 //Dessine l'origine
 void drawOrigin();
