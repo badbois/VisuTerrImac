@@ -202,7 +202,7 @@ int main(int argc, char** argv)
             std::default_random_engine generator;
             std::uniform_real_distribution<float> distribution(-(timac.Xsize)/2,(timac.Xsize)/2);
             if (switchWireframe == 0) {
-                    for (int i = 0; i <(timac.Xsize)/2.; i++) {
+                    for (int i = 0; i <(timac.Xsize)*2.; i++) {
                     glPushMatrix();
                     srand(4*i);
                     float x=distribution(generator);
