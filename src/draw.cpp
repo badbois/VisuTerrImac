@@ -214,7 +214,7 @@ void drawBillboard(float phi, GLuint texture, Point3D scale, Light Soleil) {
             glDisable(GL_TEXTURE_2D);
 }
 
-//DRAW_MENU
+//Dessine le menu
 void drawMenu(GLuint texture, Camera camera, float phi, float teta){
     
     glPushMatrix();
@@ -223,8 +223,8 @@ void drawMenu(GLuint texture, Camera camera, float phi, float teta){
         dirRegard = normalize(dirRegard);
         dirRegard = multVector(dirRegard, 0.9);
         glTranslatef(dirRegard.x, dirRegard.y, dirRegard.z);
-        glRotatef(phi*(360/6.18),0.,0.,1.);
-        glRotatef(-teta*(360/6.18), 0., 1., 0.);
+        glRotatef(phi*(360/(2*M_PI)),0.,0.,1.);
+        glRotatef(-teta*(360/(2*M_PI)), 0., 1., 0.);
 
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, texture);

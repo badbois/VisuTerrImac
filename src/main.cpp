@@ -56,7 +56,7 @@ static const Uint32 FRAMERATE_MILLISECONDS = 1000 / 60;
 
 void onWindowResized(unsigned int width, unsigned int height, Camera camera, Timac *timac)
 { 
-    float aspectRatio = width / (float) height;
+    float aspectRatio = (float) width / (float) height;
     currentHeight = height;
     currentWidth = width;
 
@@ -209,8 +209,11 @@ int main(int argc, char** argv)
                     std::uniform_real_distribution<float> distribution(-(timac.Ysize)/2,(timac.Ysize)/2);
                     float y= distribution(generator);
                     float z = computeZ(x, y, mapCopy, width, height, grayLvl, &timac)-0.1;
-                    glTranslatef(x, y, z);
-                    drawBillboard(phi, arbre , createPoint(0.,3.,3.), Soleil);
+                    Vector3D distance=createVector(abs(camera.posCam.x - x), abs(camera.posCam.y - y), 0);
+                    if(sqrt(pow(distance.x,2.)+pow(distance.y,2.))<=(0.2*timac.Zfar)){
+                        glTranslatef(x, y, z);
+                        drawBillboard(phi, arbre , createPoint(0.,3.,3.), Soleil);
+                    }
                     glPopMatrix();
                 }
             }
