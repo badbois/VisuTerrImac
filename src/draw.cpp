@@ -188,7 +188,7 @@ void drawTrianglesLines(Node noeud, float thickness){
 
 //Dessine un Billboard 
 void drawBillboard(float phi, GLuint texture, Point3D scale, Light Soleil) {
-            glRotatef(phi*(360/6.18),0.,0.,1.);
+            glRotatef(phi*(360/(2*M_PI)),0.,0.,1.);
             glScalef(scale.x,scale.y,scale.z);
             glEnable(GL_TEXTURE_2D);
             glBindTexture(GL_TEXTURE_2D, texture);

@@ -210,6 +210,7 @@ int main(int argc, char** argv)
                     float y= distribution(generator);
                     float z = computeZ(x, y, mapCopy, width, height, grayLvl, &timac)-0.1;
                     Vector3D distance=createVector(abs(camera.posCam.x - x), abs(camera.posCam.y - y), 0);
+                    //On ne dessine les arbres que s'ils sont assez proche de nous
                     if(sqrt(pow(distance.x,2.)+pow(distance.y,2.))<=(0.2*timac.Zfar)){
                         glTranslatef(x, y, z);
                         drawBillboard(phi, arbre , createPoint(0.,3.,3.), Soleil);
@@ -386,9 +387,11 @@ int main(int argc, char** argv)
 
     /* Liberation des ressources associees a la SDL */ 
 
-    for(int i=0; i<5; i++){
+    for(int i=0; i<7; i++){
         glDeleteTextures(1, &tabTextureId[i]);
     }
+    free(mapCopy);
+    free(map);
 
 
     SDL_GL_DeleteContext(context);
